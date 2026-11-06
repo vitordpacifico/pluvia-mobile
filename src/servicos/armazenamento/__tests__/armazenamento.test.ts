@@ -44,19 +44,19 @@ function alerta(recebidoEm: string) {
 beforeEach(() => AsyncStorage.clear());
 
 describe('armazenamento', () => {
-  it('devolve o padrao para chave inexistente ou JSON corrompido', async () => {
+  it('devolve o padrão para chave inexistente ou JSON corrompido', async () => {
     expect(await lerJSON('x', 7)).toBe(7);
     await AsyncStorage.setItem('x', '{quebrado');
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     expect(await lerJSON('x', 7)).toBe(7);
   });
 
-  it('trata como lista vazia o que nao for lista', async () => {
+  it('trata como lista vazia o que não for lista', async () => {
     await AsyncStorage.setItem('l', '{"a":1}');
     expect(await lerLista('l')).toEqual([]);
   });
 
-  it('nao perde alteracoes feitas ao mesmo tempo', async () => {
+  it('não perde alterações feitas ao mesmo tempo', async () => {
     await Promise.all(
       Array.from({ length: 20 }, (_, i) => atualizarLista<number>('n', (lista) => [...lista, i])),
     );
@@ -79,7 +79,7 @@ describe('alertas', () => {
     expect((await listarAlertas('u1'))[0].confirmadoEm).toBe('2026-11-05T14:06:00Z');
   });
 
-  it('separa os alertas de cada usuario', async () => {
+  it('separa os alertas de cada usuário', async () => {
     await registrarAlerta('u1', alerta('2026-11-05T14:00:10Z'));
     expect(await listarAlertas('u2')).toEqual([]);
     await apagarAlertas('u1');
@@ -101,8 +101,8 @@ describe('pontos seguidos', () => {
   });
 });
 
-describe('copia local dos pontos', () => {
-  it('salva e le a ultima lista', async () => {
+describe('cópia local dos pontos', () => {
+  it('salva e lê a última lista', async () => {
     expect(await lerCopiaPontos()).toBeNull();
     const salvoEm = new Date('2026-11-05T14:00:20Z');
     await salvarCopiaPontos([PONTO], salvoEm);

@@ -9,6 +9,7 @@ import { useDados } from '@/contexto/DadosContext';
 import {
   contarPorNivel,
   dadosDesatualizados,
+  EXPLICACAO_REGRA_DE_CONFIRMACAO,
   gravidade,
   INFO_RISCO,
   ORDEM_RISCO,
@@ -88,6 +89,7 @@ export default function TelaPainel() {
         <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
           Pontos que exigem atenção
         </Text>
+        <Text style={estilosComuns.legenda}>{EXPLICACAO_REGRA_DE_CONFIRMACAO}</Text>
         {emRisco.length === 0 ? (
           <Text style={estilosComuns.legenda}>Nenhum ponto acima do nível normal.</Text>
         ) : (

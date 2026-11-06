@@ -25,7 +25,7 @@ const api = criarFonteHttp('https://api.exemplo.com/');
 afterEach(() => jest.restoreAllMocks());
 
 describe('listarPontos', () => {
-  it('le uma resposta valida e monta a URL sem barra dupla', async () => {
+  it('lê uma resposta válida e monta a URL sem barra dupla', async () => {
     responder(200, [PONTO_VALIDO]);
     const pontos = await api.listarPontos();
     expect(pontos).toEqual([PONTO_VALIDO]);
@@ -42,12 +42,12 @@ describe('listarPontos', () => {
     await expect(api.listarPontos()).rejects.toThrow('campo "risco"');
   });
 
-  it('recusa um numero invalido', async () => {
+  it('recusa um número inválido', async () => {
     responder(200, [{ ...PONTO_VALIDO, nivelAtualCm: '14' }]);
     await expect(api.listarPontos()).rejects.toThrow('campo "nivelAtualCm"');
   });
 
-  it('recusa uma resposta que nao e lista', async () => {
+  it('recusa uma resposta que não é lista', async () => {
     responder(200, { erro: 'x' });
     await expect(api.listarPontos()).rejects.toThrow('era esperada uma lista');
   });
@@ -67,7 +67,7 @@ it('ordena as leituras pela data', async () => {
   expect(leituras.map((l) => l.nivelCm)).toEqual([1, 2]);
 });
 
-it('envia a confirmacao de seguranca por POST', async () => {
+it('envia a confirmação de segurança por POST', async () => {
   responder(204, null);
   await api.registrarConfirmacao('p1', '2026-11-05T14:03:12Z');
   const [url, opcoes] = (globalThis.fetch as jest.Mock).mock.calls[0];

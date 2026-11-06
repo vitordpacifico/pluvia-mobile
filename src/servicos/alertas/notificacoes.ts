@@ -6,9 +6,9 @@ import { INFO_RISCO } from '@/dominio/risco';
 import type { PontoMonitorado } from '@/dominio/tipos';
 
 /**
- * Notificacoes locais, geradas pelo proprio app. Funcionam no Expo Go.
- * Notificacoes enviadas pelo servidor (push) nao funcionam no Expo Go para
- * Android desde o SDK 53, entao o app consulta a API e avisa sozinho.
+ * Notificações locais, geradas pelo próprio app. Funcionam no Expo Go.
+ * Notificações enviadas pelo servidor (push) não funcionam no Expo Go para
+ * Android desde o SDK 53, então o app consulta a API e avisa sozinho.
  */
 
 const CANAL_ALERTAS = 'alertas-alagamento';

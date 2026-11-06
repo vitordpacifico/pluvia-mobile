@@ -17,7 +17,7 @@ type Campo = 'atencaoCm' | 'alertaCm' | 'evacuacaoCm';
 
 const SEM_ERROS: Record<Campo, Validacao> = { atencaoCm: null, alertaCm: null, evacuacaoCm: null };
 
-/** Formulario do agente para mudar a partir de quantos cm de agua cada nivel comeca. */
+/** Formulário do agente para mudar a partir de quantos cm de água cada nível começa. */
 export default function TelaLimites() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pontos, recarregar } = useDados();

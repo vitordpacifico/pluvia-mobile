@@ -3,9 +3,9 @@ import * as Crypto from 'expo-crypto';
 import type { TipoCidadao, Usuario } from '@/dominio/usuario';
 import { calcularHashSenha, gerarSal, senhaConfere } from '@/servicos/seguranca/senha';
 
-import { atualizarLista, CHAVES, lerLista } from './armazenamento';
+import { atualizarLista, CHAVES, lerLista, remover } from './armazenamento';
 
-/** Conta como fica salva: os dados do usuario mais o sal e o hash da senha. */
+/** Conta como fica salva: os dados do usuário mais o sal e o hash da senha. */
 interface ContaSalva extends Usuario {
   sal: string;
   senhaHash: string;
@@ -30,8 +30,8 @@ export interface DadosAtualizacaoCidadao {
 export class ErroCadastro extends Error {}
 
 /**
- * Contas criadas no primeiro uso para a demonstracao, listadas no README.
- * Agentes nao se cadastram pelo app: o acesso viria do orgao responsavel.
+ * Contas criadas no primeiro uso para a demonstração, listadas no README.
+ * Agentes não se cadastram pelo app: o acesso viria do órgão responsável.
  */
 export const CONTAS_DEMONSTRACAO = [
   {
@@ -108,7 +108,7 @@ export async function cadastrarCidadao(dados: DadosCadastroCidadao): Promise<Usu
   return paraUsuario(conta);
 }
 
-/** Devolve o usuario se o e-mail e a senha conferirem. Caso contrario, null. */
+/** Devolve o usuário se o e-mail e a senha conferirem. Caso contrário, null. */
 export async function autenticar(email: string, senha: string): Promise<Usuario | null> {
   const contas = await lerLista<ContaSalva>(CHAVES.contas);
   const conta = contas.find((c) => c.email === normalizarEmail(email));
@@ -132,4 +132,13 @@ export async function atualizarCidadao(
   const conta = contas.find((c) => c.id === id);
   if (!conta) throw new ErroCadastro('Conta não encontrada.');
   return paraUsuario(conta);
+}
+
+/**
+ * Apaga a conta e todos os dados dela neste celular: pontos acompanhados e alertas.
+ * Atende ao direito de eliminação dos dados previsto na LGPD.
+ */
+export async function excluirConta(id: string): Promise<void> {
+  await atualizarLista<ContaSalva>(CHAVES.contas, (contas) => contas.filter((c) => c.id !== id));
+  await Promise.all([remover(CHAVES.pontosSeguidos(id)), remover(CHAVES.alertas(id))]);
 }

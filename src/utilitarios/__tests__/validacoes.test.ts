@@ -10,12 +10,12 @@ import {
 } from '../validacoes';
 
 describe('validarNome', () => {
-  it('aceita nomes com acento, espaco e apostrofo', () => {
+  it('aceita nomes com acento, espaço e apóstrofo', () => {
     expect(validarNome('Ana')).toBeNull();
     expect(validarNome('João da Silva')).toBeNull();
     expect(validarNome("Maria D'Ávila")).toBeNull();
   });
-  it('recusa vazio, curto, longo e com numeros', () => {
+  it('recusa vazio, curto, longo e com números', () => {
     expect(validarNome('  ')).toMatch(/Informe/);
     expect(validarNome('A')).toMatch(/2 letras/);
     expect(validarNome('a'.repeat(61))).toMatch(/60/);
@@ -46,8 +46,8 @@ describe('validarTelefone', () => {
 });
 
 describe('validarCep', () => {
-  it('aceita 8 digitos', () => expect(validarCep('01001-000')).toBeNull());
-  it('recusa vazio, incompleto e so zeros', () => {
+  it('aceita 8 dígitos', () => expect(validarCep('01001-000')).toBeNull());
+  it('recusa vazio, incompleto e só zeros', () => {
     expect(validarCep('')).toMatch(/Informe/);
     expect(validarCep('0100')).toMatch(/8/);
     expect(validarCep('00000-000')).toMatch(/inválido/);
@@ -55,14 +55,14 @@ describe('validarCep', () => {
 });
 
 describe('senha', () => {
-  it('exige 8 caracteres com letras e numeros', () => {
+  it('exige 8 caracteres com letras e números', () => {
     expect(validarSenha('Senha123')).toBeNull();
     expect(validarSenha('')).toMatch(/Crie/);
     expect(validarSenha('Ab1')).toMatch(/8/);
     expect(validarSenha('somenteletras')).toMatch(/letras e números/);
     expect(validarSenha('12345678')).toMatch(/letras e números/);
   });
-  it('exige confirmacao igual', () => {
+  it('exige confirmação igual', () => {
     expect(validarConfirmacaoSenha('Senha123', 'Senha123')).toBeNull();
     expect(validarConfirmacaoSenha('Senha123', '')).toMatch(/Repita/);
     expect(validarConfirmacaoSenha('Senha123', 'Senha124')).toMatch(/iguais/);
@@ -79,7 +79,7 @@ describe('validarLimites', () => {
     expect(erros.alertaCm).toMatch(/entre/);
     expect(erros.evacuacaoCm).toMatch(/entre/);
   });
-  it('exige que cada nivel comece acima do anterior', () => {
+  it('exige que cada nível comece acima do anterior', () => {
     const erros = validarLimites({ atencaoCm: 30, alertaCm: 25, evacuacaoCm: 25 });
     expect(erros.atencaoCm).toBeNull();
     expect(erros.alertaCm).toMatch(/Atenção/);

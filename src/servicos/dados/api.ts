@@ -2,7 +2,7 @@ import { ehNivelRisco } from '@/dominio/risco';
 import type { FonteDeDados, Leitura, LimitesRisco, PontoMonitorado } from '@/dominio/tipos';
 
 /**
- * Cliente da API real em C#. O contrato e uma proposta, descrita em docs/API.md,
+ * Cliente da API real em C#. O contrato é uma proposta, descrita em docs/API.md,
  * e precisa ser combinado com quem desenvolve a API.
  */
 

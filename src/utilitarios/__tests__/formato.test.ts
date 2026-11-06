@@ -10,6 +10,6 @@ it.each([
   expect(formatarDuracao(ms)).toBe(esperado);
 });
 
-it('usa virgula decimal nos centimetros', () => {
+it('usa vírgula decimal nos centímetros', () => {
   expect(formatarCm(14.46)).toBe('14,5 cm');
 });

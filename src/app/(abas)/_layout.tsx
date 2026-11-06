@@ -8,7 +8,7 @@ import { cores } from '@/estilos/tema';
 
 /**
  * Abas por perfil:
- * - cidadao: Pontos, Alertas e Perfil;
+ * - cidadão: Pontos, Alertas e Perfil;
  * - agente: Pontos, Painel e Perfil.
  */
 export default function LayoutAbas() {

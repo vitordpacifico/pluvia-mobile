@@ -3,14 +3,14 @@ import type { NivelRisco, PontoMonitorado, PontoSeguido } from '@/dominio/tipos'
 
 import { atualizarLista, CHAVES, lerLista } from './armazenamento';
 
-/** Pontos em que cada cidadao ativou os alertas, com o ultimo risco conhecido. */
+/** Pontos em que cada cidadão ativou os alertas, com o último risco conhecido. */
 
 export async function listarPontosSeguidos(usuarioId: string): Promise<PontoSeguido[]> {
   const lista = await lerLista<PontoSeguido>(CHAVES.pontosSeguidos(usuarioId));
   return lista.map((p) => ({ ...p, ultimoRisco: ehNivelRisco(p.ultimoRisco) ? p.ultimoRisco : 'NORMAL' }));
 }
 
-/** Guarda o risco atual para so avisar quando ele piorar a partir de agora. */
+/** Guarda o risco atual para só avisar quando ele piorar a partir de agora. */
 export async function seguirPonto(usuarioId: string, ponto: PontoMonitorado): Promise<void> {
   await atualizarLista<PontoSeguido>(CHAVES.pontosSeguidos(usuarioId), (lista) => [
     ...lista.filter((p) => p.pontoId !== ponto.id),

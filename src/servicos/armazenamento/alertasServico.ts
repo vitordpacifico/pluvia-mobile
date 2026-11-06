@@ -4,7 +4,7 @@ import type { AlertaRegistrado } from '@/dominio/tipos';
 
 import { atualizarLista, CHAVES, lerLista } from './armazenamento';
 
-/** Historico de alertas de cada cidadao. Guarda os 100 mais recentes. */
+/** Histórico de alertas de cada cidadão. Guarda os 100 mais recentes. */
 const MAXIMO_ALERTAS = 100;
 
 export async function listarAlertas(usuarioId: string): Promise<AlertaRegistrado[]> {

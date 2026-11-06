@@ -1,7 +1,7 @@
 /**
  * Perfis do app:
- * - cidadao: morador ou comerciante. Acompanha pontos e recebe alertas.
- * - agente: Defesa Civil. Ve o painel de todos os pontos e ajusta os limites de risco.
+ * - cidadão: morador ou comerciante. Acompanha pontos e recebe alertas.
+ * - agente: Defesa Civil. Vê o painel de todos os pontos e ajusta os limites de risco.
  */
 export type PerfilUsuario = 'cidadao' | 'agente';
 
@@ -13,11 +13,11 @@ export interface Usuario {
   email: string;
   perfil: PerfilUsuario;
   criadoEm: string;
-  /** So para cidadao. */
+  /** Só para cidadão. */
   telefone?: string;
   cep?: string;
   tipoCidadao?: TipoCidadao;
-  /** So para agente. */
+  /** Só para agente. */
   orgao?: string;
 }
 

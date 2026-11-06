@@ -14,10 +14,10 @@ import type { PontoMonitorado } from '@/dominio/tipos';
 import { lerCopiaPontos, salvarCopiaPontos } from '@/servicos/armazenamento/cacheServico';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 
-/** De quanto em quanto tempo o app consulta os pontos enquanto esta aberto. */
+/** De quanto em quanto tempo o app consulta os pontos enquanto está aberto. */
 export const INTERVALO_ATUALIZACAO_MS = 10_000;
 
-/** De onde vieram os pontos mostrados: da consulta mais recente ou da copia salva no celular. */
+/** De onde vieram os pontos mostrados: da consulta mais recente ou da cópia salva no celular. */
 export type OrigemDados = 'rede' | 'copia-local';
 
 interface EstadoDados {
@@ -39,8 +39,8 @@ function mensagemDeErro(erro: unknown): string {
 }
 
 /**
- * Uma unica consulta periodica, compartilhada por todas as telas e pelo monitor de risco.
- * Cada resposta e salva no AsyncStorage. Sem conexao, o app mostra a ultima copia salva.
+ * Uma única consulta periódica, compartilhada por todas as telas e pelo monitor de risco.
+ * Cada resposta é salva no AsyncStorage. Sem conexão, o app mostra a última cópia salva.
  */
 export function DadosProvider({ children }: { children: ReactNode }) {
   const [pontos, setPontos] = useState<PontoMonitorado[]>([]);
@@ -51,7 +51,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   const emAndamento = useRef(false);
   const recebeuDaRede = useRef(false);
 
-  /** Ignora a chamada se ja houver uma consulta em andamento. */
+  /** Ignora a chamada se já houver uma consulta em andamento. */
   const recarregar = useCallback((): Promise<void> => {
     if (emAndamento.current) return Promise.resolve();
     emAndamento.current = true;
@@ -75,7 +75,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
-  // Mostra a copia salva enquanto a primeira consulta nao responde.
+  // Mostra a cópia salva enquanto a primeira consulta não responde.
   useEffect(() => {
     lerCopiaPontos()
       .then((copia) => {

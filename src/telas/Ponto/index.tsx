@@ -8,7 +8,7 @@ import { GraficoNivel } from '@/componentes/GraficoNivel';
 import { SeloRisco } from '@/componentes/SeloRisco';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { useDados } from '@/contexto/DadosContext';
-import { dadosDesatualizados, INFO_RISCO } from '@/dominio/risco';
+import { dadosDesatualizados, EXPLICACAO_REGRA_DE_CONFIRMACAO, INFO_RISCO } from '@/dominio/risco';
 import type { Leitura, NivelRisco } from '@/dominio/tipos';
 import { ehAgente } from '@/dominio/usuario';
 import { estilosComuns } from '@/estilos/comuns';
@@ -46,7 +46,7 @@ export default function TelaPonto() {
       .catch((e) => console.warn('Falha ao ler os pontos seguidos', e));
   }, [usuario, agente, id]);
 
-  // Recarrega o historico sempre que chega uma leitura nova.
+  // Recarrega o histórico sempre que chega uma leitura nova.
   const atualizadoEm = ponto?.atualizadoEm;
   useEffect(() => {
     if (!id || !atualizadoEm) return;
@@ -169,6 +169,7 @@ export default function TelaPonto() {
         <Text style={estilosComuns.legenda}>
           A partir de quantos centímetros de água cada nível começa.
         </Text>
+        <Text style={estilosComuns.legenda}>{EXPLICACAO_REGRA_DE_CONFIRMACAO}</Text>
         {NIVEIS_COM_LIMITE.map((risco) => {
           const cm =
             risco === 'ATENCAO'

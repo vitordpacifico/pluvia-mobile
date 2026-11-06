@@ -51,18 +51,18 @@ describe('mascararCentimetros', () => {
   });
 });
 
-it('converte o texto de centimetros em numero', () => {
+it('converte o texto de centímetros em número', () => {
   expect(lerCentimetros('12,5')).toBe(12.5);
   expect(lerCentimetros('40')).toBe(40);
   expect(lerCentimetros('')).toBeNull();
   expect(lerCentimetros(' ')).toBeNull();
 });
 
-it('converte numero em texto com virgula', () => {
+it('converte número em texto com vírgula', () => {
   expect(centimetrosParaTexto(12.5)).toBe('12,5');
   expect(centimetrosParaTexto(40)).toBe('40');
 });
 
-it('remove tudo que nao e digito', () => {
+it('remove tudo que não é dígito', () => {
   expect(somenteDigitos('(11) 9-12')).toBe('11912');
 });

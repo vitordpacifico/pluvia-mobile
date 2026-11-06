@@ -23,7 +23,7 @@ interface InfoRisco {
   orientacao: string;
 }
 
-/** Cor, icone e texto: o risco nunca e comunicado so pela cor. */
+/** Cor, ícone e texto: o risco nunca é comunicado só pela cor. */
 export const INFO_RISCO: Record<NivelRisco, InfoRisco> = {
   NORMAL: {
     rotulo: 'Normal',
@@ -65,11 +65,11 @@ export function classificarNivel(nivelCm: number, limites: LimitesRisco): NivelR
 }
 
 /**
- * Regra do grupo contra alarme falso: o risco so muda depois de duas leituras
- * seguidas no novo nivel. Na solucao final quem aplica a regra e a API; aqui ela
- * e usada pela simulacao. Aplicar a mesma regra na descida e uma suposicao.
+ * Regra do grupo contra alarme falso: o risco só muda depois de duas leituras
+ * seguidas no novo nível. Na solução final quem aplica a regra é a API; aqui ela
+ * é usada pela simulação. Aplicar a mesma regra na descida é uma suposição.
  *
- * As leituras precisam estar em ordem cronologica.
+ * As leituras precisam estar em ordem cronológica.
  */
 export function aplicarRegraDeConfirmacao(
   leituras: readonly Leitura[],
@@ -89,6 +89,11 @@ export function aplicarRegraDeConfirmacao(
   return { risco, detectadoEm };
 }
 
+/** Texto mostrado nas telas para explicar por que o nível demora alguns segundos para mudar. */
+export const EXPLICACAO_REGRA_DE_CONFIRMACAO =
+  'O nível só muda depois de 2 leituras seguidas do sensor, para evitar alarme falso. ' +
+  'Por isso a água pode passar do limite alguns segundos antes de o nível mudar.';
+
 /** Depois deste tempo sem leitura, o app avisa que os dados podem estar desatualizados. */
 export const MINUTOS_PARA_DADO_ANTIGO = 5;
 
@@ -97,14 +102,14 @@ export function dadosDesatualizados(ponto: PontoMonitorado, agora = Date.now()):
 }
 
 /**
- * Indicador de impacto do projeto: tempo entre a deteccao da condicao pelo sensor
+ * Indicador de impacto do projeto: tempo entre a detecção da condição pelo sensor
  * e a chegada do alerta ao morador.
  */
 export function tempoAteReceber(alerta: { detectadoEm: string; recebidoEm: string }): number {
   return Date.parse(alerta.recebidoEm) - Date.parse(alerta.detectadoEm);
 }
 
-/** Quantos pontos estao em cada nivel. Usado no painel do agente. */
+/** Quantos pontos estão em cada nível. Usado no painel do agente. */
 export function contarPorNivel(pontos: readonly PontoMonitorado[]): Record<NivelRisco, number> {
   const contagem: Record<NivelRisco, number> = { NORMAL: 0, ATENCAO: 0, ALERTA: 0, EVACUACAO: 0 };
   for (const ponto of pontos) contagem[ponto.risco]++;

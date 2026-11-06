@@ -15,6 +15,7 @@ import {
   atualizarCidadao,
   autenticar,
   cadastrarCidadao,
+  excluirConta as excluirContaSalva,
   garantirContasDemonstracao,
   obterUsuario,
   type DadosAtualizacaoCidadao,
@@ -29,12 +30,14 @@ export class ErroLogin extends Error {}
 
 interface EstadoAutenticacao {
   usuario: Usuario | null;
-  /** Verdadeiro enquanto a sessao salva ainda esta sendo lida. */
+  /** Verdadeiro enquanto a sessão salva ainda está sendo lida. */
   carregando: boolean;
   entrar: (email: string, senha: string) => Promise<void>;
   cadastrar: (dados: DadosCadastroCidadao) => Promise<void>;
   atualizar: (dados: DadosAtualizacaoCidadao) => Promise<void>;
   sair: () => Promise<void>;
+  /** Confere a senha antes de apagar. Só contas de cidadão podem ser excluídas pelo app. */
+  excluirConta: (senha: string) => Promise<void>;
 }
 
 const AutenticacaoContext = createContext<EstadoAutenticacao | null>(null);
@@ -44,7 +47,7 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true);
   const falhas = useRef({ quantidade: 0, bloqueadoAte: 0 });
 
-  // Cria as contas de demonstracao e restaura a sessao, se houver.
+  // Cria as contas de demonstração e restaura a sessão, se houver.
   useEffect(() => {
     garantirContasDemonstracao()
       .then(lerSessao)
@@ -94,9 +97,22 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
     setUsuario(null);
   }, []);
 
+  const excluirConta = useCallback(
+    async (senha: string) => {
+      if (!usuario || usuario.perfil !== 'cidadao') {
+        throw new ErroLogin('Só contas de cidadão podem ser excluídas pelo app.');
+      }
+      if (!(await autenticar(usuario.email, senha))) throw new ErroLogin('Senha incorreta.');
+      await excluirContaSalva(usuario.id);
+      await encerrarSessao();
+      setUsuario(null);
+    },
+    [usuario],
+  );
+
   const valor = useMemo(
-    () => ({ usuario, carregando, entrar, cadastrar, atualizar, sair }),
-    [usuario, carregando, entrar, cadastrar, atualizar, sair],
+    () => ({ usuario, carregando, entrar, cadastrar, atualizar, sair, excluirConta }),
+    [usuario, carregando, entrar, cadastrar, atualizar, sair, excluirConta],
   );
 
   return <AutenticacaoContext.Provider value={valor}>{children}</AutenticacaoContext.Provider>;

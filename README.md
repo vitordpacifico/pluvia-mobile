@@ -107,9 +107,9 @@ Também é possível criar uma conta de cidadão em **Criar conta**. Agentes nã
 | **Pontos** | Todos | Pontos monitorados, com os de maior risco primeiro. Funciona sem conexão, com a última cópia salva. |
 | **Ponto** | Todos | Nível da água, risco, o que fazer, gráfico e limites. O cidadão ativa alertas, e o agente ajusta os limites. |
 | **Alertas** | Cidadão | Alertas recebidos, tempo até a chegada e "Estou em segurança". A aba mostra quantos faltam confirmar. |
-| **Painel** | Agente | Pontos por nível, pontos que exigem atenção, sensores sem sinal e controle da simulação IoT |
+| **Painel** | Agente | Pontos por nível, pontos que exigem atenção (com a explicação da regra das 2 leituras), sensores sem sinal e controle da simulação IoT |
 | **Ajustar limites** | Agente | Formulário com máscara de centímetros e validação de ordem entre os níveis |
-| **Perfil** | Todos | O cidadão edita os dados (com as mesmas máscaras), gerencia notificações e pontos seguidos. Todos podem sair. |
+| **Perfil** | Todos | O cidadão edita os dados (com as mesmas máscaras), gerencia notificações e pontos seguidos e pode excluir a conta, confirmando com a senha. Todos podem sair. |
 
 ## Como o app atende a avaliação
 
@@ -117,7 +117,7 @@ Também é possível criar uma conta de cidadão em **Criar conta**. Agentes nã
 |---|---|
 | **Telas e navegação** | Expo Router com 8 telas. Rotas protegidas por login (`Stack.Protected`) e por perfil: o cidadão vê a aba Alertas, e o agente vê o Painel e o ajuste de limites. A notificação abre o ponto que gerou o alerta. |
 | **Consumo de dados (mock ou simulação IoT)** | `src/servicos/dados/simulacao.ts` imita um ESP32 com sensor ultrassônico: mede a distância até a água a cada 10 s, com ruído, e calcula o nível. A simulação gera alertas, notificações e vibração. O agente pode provocar uma chuva forte em qualquer ponto. O cliente da API real (`api.ts`) segue o mesmo contrato, com validação de cada resposta. |
-| **Persistência (AsyncStorage)** | Camada de serviço em `src/servicos/armazenamento/`: contas, sessão, pontos seguidos, alertas, cópia offline dos pontos e limites ajustados. Só `armazenamento.ts` acessa o AsyncStorage diretamente. |
+| **Persistência (AsyncStorage)** | Camada de serviço em `src/servicos/armazenamento/`: contas, sessão, pontos seguidos, alertas, cópia offline dos pontos, limites ajustados e chuvas simuladas, que continuam depois de fechar o app. Só `armazenamento.ts` acessa o AsyncStorage diretamente. |
 | **Acessibilidade** | Veja a seção abaixo |
 | **Aderência ao problema** | Avisa quando o risco piora e diz o que fazer em cada nível. Mede o indicador de impacto do grupo e avisa quando o sensor para de enviar dados. Dá ao agente a visão de todos os pontos. |
 | **Documentação** | Este README, o contrato da API ([docs/API.md](docs/API.md)), o roteiro do vídeo e o `prompts.md` |
@@ -191,6 +191,7 @@ flowchart LR
 - A senha nunca é salva em texto. O app guarda um sal aleatório e o hash SHA-256 de sal + senha.
 - A comparação do hash leva o mesmo tempo, encontre ou não uma diferença.
 - O login bloqueia por 30 segundos depois de 5 senhas erradas seguidas.
+- A exclusão de conta pede a senha de novo e apaga a conta, os pontos acompanhados e os alertas do celular, atendendo ao direito de eliminação dos dados da LGPD.
 - **Limite conhecido:** o login é local porque a API ainda não existe. Em produção, a autenticação ficaria no servidor, com bcrypt ou Argon2.
 
 ### Notificações
@@ -226,11 +227,14 @@ npm run typecheck
 npm run lint
 ```
 
-São 106 testes automatizados: máscaras, validações, contas e senhas, armazenamento, regra de risco, simulação IoT, cliente da API e criação de alertas.
+São 129 testes automatizados, divididos em duas camadas:
+
+- **Lógica:** máscaras, validações, contas e senhas, exclusão de conta, armazenamento, regra de risco, simulação IoT, cliente da API e criação de alertas.
+- **Telas** (React Native Testing Library): login com bloqueio por tentativas, cadastro com máscaras e erros, ajuste de limites, painel do agente e exclusão de conta.
 
 ## Dados
 
 - Os pontos, endereços e níveis da água são simulados e aparecem marcados como "dados de demonstração" no app.
 - Nenhum dado pessoal real é usado.
-- Os dados ficam somente no celular.
+- Os dados ficam somente no celular, e o cidadão pode excluí-los pelo Perfil.
 - O SENTINELA não substitui as orientações oficiais da Defesa Civil.

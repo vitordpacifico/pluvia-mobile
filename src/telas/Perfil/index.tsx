@@ -6,7 +6,7 @@ import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
 import { CampoTexto } from '@/componentes/CampoTexto';
 import { GrupoOpcoes } from '@/componentes/GrupoOpcoes';
-import { useAutenticacao } from '@/contexto/AutenticacaoContext';
+import { ErroLogin, useAutenticacao } from '@/contexto/AutenticacaoContext';
 import type { PontoSeguido } from '@/dominio/tipos';
 import {
   ehCidadao,
@@ -41,7 +41,7 @@ function Dado({ rotulo, valor }: { rotulo: string; valor: string }) {
   );
 }
 
-/** Formulario de edicao do cidadao, com as mesmas mascaras e validacoes do cadastro. */
+/** Formulário de edição do cidadão, com as mesmas máscaras e validações do cadastro. */
 function EditarCidadao({ usuario }: { usuario: Usuario }) {
   const { atualizar } = useAutenticacao();
   const [nome, setNome] = useState(usuario.nome);
@@ -108,6 +108,76 @@ function EditarCidadao({ usuario }: { usuario: Usuario }) {
       />
       {mensagem && <Aviso tipo={mensagem.tipo} texto={mensagem.texto} />}
       <Botao rotulo="Salvar alterações" icone="content-save" ocupado={salvando} onPress={salvar} />
+    </View>
+  );
+}
+
+/** Exclusão da conta: pede a senha de novo para evitar que outra pessoa apague por engano. */
+function ExcluirConta() {
+  const { excluirConta } = useAutenticacao();
+  const [aberto, setAberto] = useState(false);
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState<string | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
+
+  async function confirmar() {
+    if (!senha) {
+      setErro('Digite sua senha para confirmar.');
+      return;
+    }
+    setExcluindo(true);
+    setErro(null);
+    try {
+      await excluirConta(senha);
+    } catch (e) {
+      setErro(e instanceof ErroLogin ? e.message : 'Não foi possível excluir a conta.');
+      setExcluindo(false);
+    }
+  }
+
+  function cancelar() {
+    setAberto(false);
+    setSenha('');
+    setErro(null);
+  }
+
+  return (
+    <View style={[estilosComuns.cartao, estilos.formulario]}>
+      <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
+        Excluir conta
+      </Text>
+      <Text style={estilosComuns.legenda}>
+        Apaga sua conta, os pontos que você acompanha e seus alertas deste celular. Não dá para
+        desfazer.
+      </Text>
+      {aberto ? (
+        <>
+          <CampoTexto
+            rotulo="Sua senha"
+            valor={senha}
+            onMudar={setSenha}
+            erro={erro}
+            senha
+            autoComplete="current-password"
+          />
+          <Botao
+            rotulo="Confirmar exclusão"
+            icone="delete-forever"
+            variante="perigo"
+            ocupado={excluindo}
+            onPress={confirmar}
+          />
+          <Botao rotulo="Cancelar" variante="secundario" onPress={cancelar} />
+        </>
+      ) : (
+        <Botao
+          rotulo="Excluir minha conta"
+          icone="delete"
+          variante="perigo"
+          dica="Abre a confirmação com a sua senha"
+          onPress={() => setAberto(true)}
+        />
+      )}
     </View>
   );
 }
@@ -220,7 +290,9 @@ export default function TelaPerfil() {
           </View>
         )}
 
-        <Botao rotulo="Sair da conta" icone="logout" variante="perigo" onPress={confirmarSaida} />
+        <Botao rotulo="Sair da conta" icone="logout" variante="secundario" onPress={confirmarSaida} />
+
+        {cidadao && <ExcluirConta />}
 
         <Text style={estilosComuns.rodape}>
           O SENTINELA não substitui as orientações oficiais da Defesa Civil.

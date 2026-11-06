@@ -1,7 +1,7 @@
-/** Niveis de risco definidos pelo grupo, do menor para o maior. */
+/** Níveis de risco definidos pelo grupo, do menor para o maior. */
 export type NivelRisco = 'NORMAL' | 'ATENCAO' | 'ALERTA' | 'EVACUACAO';
 
-/** Altura da agua, em cm, a partir da qual cada nivel comeca. Configuravel por ponto. */
+/** Altura da água, em cm, a partir da qual cada nível começa. Configurável por ponto. */
 export interface LimitesRisco {
   atencaoCm: number;
   alertaCm: number;
@@ -15,9 +15,9 @@ export interface PontoMonitorado {
   regiao: string;
   nivelAtualCm: number;
   risco: NivelRisco;
-  /** Horario da primeira leitura que levou ao risco atual. Nulo quando sempre esteve NORMAL. */
+  /** Horário da primeira leitura que levou ao risco atual. Nulo quando sempre esteve NORMAL. */
   riscoDetectadoEm: string | null;
-  /** Horario da ultima leitura recebida do sensor. */
+  /** Horário da última leitura recebida do sensor. */
   atualizadoEm: string;
   limites: LimitesRisco;
 }
@@ -28,7 +28,7 @@ export interface Leitura {
   medidoEm: string;
 }
 
-/** Contrato que tanto a simulacao quanto a API real seguem. */
+/** Contrato que tanto a simulação quanto a API real seguem. */
 export interface FonteDeDados {
   readonly simulada: boolean;
   listarPontos(): Promise<PontoMonitorado[]>;
@@ -38,7 +38,7 @@ export interface FonteDeDados {
   atualizarLimites(pontoId: string, limites: LimitesRisco): Promise<void>;
 }
 
-/** Alerta recebido pelo cidadao, guardado no celular. */
+/** Alerta recebido pelo cidadão, guardado no celular. */
 export interface AlertaRegistrado {
   id: string;
   pontoId: string;
@@ -50,7 +50,7 @@ export interface AlertaRegistrado {
   confirmadoEm: string | null;
 }
 
-/** Ponto em que o cidadao ativou os alertas. */
+/** Ponto em que o cidadão ativou os alertas. */
 export interface PontoSeguido {
   pontoId: string;
   pontoNome: string;

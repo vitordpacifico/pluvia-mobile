@@ -4,13 +4,13 @@ import type { FonteDeDados, Leitura, LimitesRisco, PontoMonitorado } from '@/dom
 import { CHAVES, lerJSON, salvarJSON } from '@/servicos/armazenamento/armazenamento';
 
 /**
- * Simulacao IoT, usada enquanto a API em C# e o ESP32 nao estao ligados ao app.
+ * Simulação IoT, usada enquanto a API em C# e o ESP32 não estão ligados ao app.
  *
- * Cada ponto imita um ESP32 com sensor ultrassonico preso a 2,5 m do chao. A cada 10 s o
- * "sensor" mede a distancia ate a agua, com um pequeno ruido, e o nivel e calculado como
- * altura de instalacao - distancia. A regra das duas leituras seguidas define o risco.
+ * Cada ponto imita um ESP32 com sensor ultrassônico preso a 2,5 m do chão. A cada 10 s o
+ * "sensor" mede a distância até a água, com um pequeno ruído, e o nível é calculado como
+ * altura de instalação - distância. A regra das duas leituras seguidas define o risco.
  *
- * Nomes, enderecos, limites e niveis sao ficticios.
+ * Nomes, endereços, limites e níveis são fictícios.
  */
 
 const INTERVALO_LEITURA_MS = 10_000;
@@ -20,8 +20,8 @@ const ALTURA_INSTALACAO_CM = 250;
 const NIVEL_SEM_CHUVA_CM = 2;
 
 /**
- * Chuva forte em 6 minutos: normal ate 30 s, sobe ate 48 cm aos 150 s,
- * fica parada ate 210 s, desce ate 300 s e volta ao normal.
+ * Chuva forte em 6 minutos: normal até 30 s, sobe até 48 cm aos 150 s,
+ * fica parada até 210 s, desce até 300 s e volta ao normal.
  */
 function nivelDaChuvaForte(segundos: number): number {
   if (segundos < 0) return NIVEL_SEM_CHUVA_CM;
@@ -43,7 +43,7 @@ interface PontoSimulado {
   nome: string;
   endereco: string;
   regiao: string;
-  /** Simula um sensor que parou de enviar leituras ha este tempo. */
+  /** Simula um sensor que parou de enviar leituras há este tempo. */
   semSinalHaMs?: number;
 }
 
@@ -63,29 +63,61 @@ export const PONTOS_SIMULADOS: readonly PontoSimulado[] = [
 
 const chuvas = new Map<string, Chuva>();
 let limitesPersonalizados: Record<string, LimitesRisco> = {};
-let carregamentoDosLimites: Promise<void> | null = null;
+let carregamento: Promise<void> | null = null;
+/** Verdadeiro quando o agente mexeu na simulação antes de o estado salvo ser lido. */
+let alteradaNestaSessao = false;
 
-/** Recomeca do zero: so o Ponto A tem chuva, que comeca agora. */
-export function reiniciarSimulacao(): void {
+/** Situação inicial: só o Ponto A tem chuva, que começa agora. */
+function definirChuvaPadrao(): void {
   chuvas.clear();
   chuvas.set('demo-a', { inicio: Date.now(), repetir: true });
 }
-reiniciarSimulacao();
+definirChuvaPadrao();
 
-/** Acao do agente: comeca agora uma chuva forte, de 6 minutos, no ponto escolhido. */
-export function simularChuvaForte(pontoId: string): void {
-  if (!PONTOS_SIMULADOS.some((p) => p.id === pontoId)) throw new Error('Ponto não encontrado.');
-  chuvas.set(pontoId, { inicio: Date.now(), repetir: false });
+function salvarChuvas(): void {
+  salvarJSON(CHAVES.chuvasSimulacao, Object.fromEntries(chuvas)).catch(() => undefined);
 }
 
-/** Os limites ajustados pelo agente ficam salvos no celular. */
-function carregarLimites(): Promise<void> {
-  carregamentoDosLimites ??= lerJSON<Record<string, LimitesRisco>>(CHAVES.limitesSimulacao, {})
-    .then((salvos) => {
-      limitesPersonalizados = { ...salvos, ...limitesPersonalizados };
+/** Recomeça do zero e apaga as chuvas simuladas pelo agente. */
+export function reiniciarSimulacao(): void {
+  alteradaNestaSessao = true;
+  definirChuvaPadrao();
+  salvarChuvas();
+}
+
+/** Ação do agente: começa agora uma chuva forte, de 6 minutos, no ponto escolhido. */
+export function simularChuvaForte(pontoId: string): void {
+  if (!PONTOS_SIMULADOS.some((p) => p.id === pontoId)) throw new Error('Ponto não encontrado.');
+  alteradaNestaSessao = true;
+  chuvas.set(pontoId, { inicio: Date.now(), repetir: false });
+  salvarChuvas();
+}
+
+function ehChuva(valor: unknown): valor is Chuva {
+  if (typeof valor !== 'object' || valor === null) return false;
+  const chuva = valor as Record<string, unknown>;
+  return typeof chuva.inicio === 'number' && typeof chuva.repetir === 'boolean';
+}
+
+/**
+ * Lê uma única vez o que ficou salvo no celular: os limites ajustados pelo agente e as chuvas
+ * em andamento. Assim a simulação continua de onde parou quando o app é aberto de novo.
+ */
+function carregarEstadoSalvo(): Promise<void> {
+  carregamento ??= Promise.all([
+    lerJSON<Record<string, LimitesRisco>>(CHAVES.limitesSimulacao, {}),
+    lerJSON<Record<string, unknown> | null>(CHAVES.chuvasSimulacao, null),
+  ])
+    .then(([limites, chuvasSalvas]) => {
+      limitesPersonalizados = { ...limites, ...limitesPersonalizados };
+      if (!chuvasSalvas || alteradaNestaSessao) return;
+      chuvas.clear();
+      for (const [pontoId, chuva] of Object.entries(chuvasSalvas)) {
+        if (ehChuva(chuva)) chuvas.set(pontoId, chuva);
+      }
     })
     .catch(() => undefined);
-  return carregamentoDosLimites;
+  return carregamento;
 }
 
 function limitesDe(pontoId: string): LimitesRisco {
@@ -100,12 +132,12 @@ function nivelReal(pontoId: string, instante: number): number {
   return nivelDaChuvaForte(segundos);
 }
 
-/** Pequena oscilacao, como a de um sensor real, sem alterar o nivel de risco. */
+/** Pequena oscilação, como a de um sensor real, sem alterar o nível de risco. */
 function ruido(instante: number): number {
   return Math.sin(instante / 7000) * 0.4;
 }
 
-/** O que o sensor mediria: a distancia entre ele e a superficie da agua. */
+/** O que o sensor mediria: a distância entre ele e a superfície da água. */
 function medirDistancia(pontoId: string, instante: number): number {
   return ALTURA_INSTALACAO_CM - nivelReal(pontoId, instante) + ruido(instante);
 }
@@ -145,7 +177,7 @@ function montarPonto(ponto: PontoSimulado, agora: number): PontoMonitorado {
   };
 }
 
-/** Atraso artificial, para o app tambem lidar com o tempo de resposta de uma rede. */
+/** Atraso artificial, para o app também lidar com o tempo de resposta de uma rede. */
 function aguardar(ms: number): Promise<void> {
   return new Promise((resolver) => setTimeout(resolver, ms));
 }
@@ -160,7 +192,7 @@ export const fonteSimulada: FonteDeDados = {
   simulada: true,
 
   async listarPontos() {
-    await Promise.all([carregarLimites(), aguardar(300)]);
+    await Promise.all([carregarEstadoSalvo(), aguardar(300)]);
     const agora = Date.now();
     return PONTOS_SIMULADOS.map((ponto) => montarPonto(ponto, agora));
   },
@@ -176,7 +208,7 @@ export const fonteSimulada: FonteDeDados = {
 
   async atualizarLimites(pontoId, limites) {
     buscarPonto(pontoId);
-    await carregarLimites();
+    await carregarEstadoSalvo();
     limitesPersonalizados = { ...limitesPersonalizados, [pontoId]: limites };
     await salvarJSON(CHAVES.limitesSimulacao, limitesPersonalizados);
   },

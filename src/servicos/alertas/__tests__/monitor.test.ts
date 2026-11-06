@@ -67,32 +67,32 @@ it('cria alerta e notifica quando o risco piora', async () => {
   expect(mockNotificacoes.notificarMudancaDeRisco).toHaveBeenCalledTimes(1);
 });
 
-it('so atualiza o risco quando ele melhora', async () => {
+it('só atualiza o risco quando ele melhora', async () => {
   seguindo('EVACUACAO');
   expect(await verificarPontosSeguidos(USUARIO, [ponto('ATENCAO')], () => AGORA)).toBe(0);
   expect(mockSeguidos.atualizarUltimoRisco).toHaveBeenCalledWith(USUARIO, 'p1', 'ATENCAO');
   expect(mockAlertas.registrarAlerta).not.toHaveBeenCalled();
 });
 
-it('nao faz nada quando o risco nao muda', async () => {
+it('não faz nada quando o risco não muda', async () => {
   seguindo('ALERTA');
   expect(await verificarPontosSeguidos(USUARIO, [ponto('ALERTA')], () => AGORA)).toBe(0);
   expect(mockSeguidos.atualizarUltimoRisco).not.toHaveBeenCalled();
 });
 
-it('ignora pontos que o morador nao acompanha', async () => {
+it('ignora pontos que o morador não acompanha', async () => {
   mockSeguidos.listarPontosSeguidos.mockResolvedValue([]);
   expect(await verificarPontosSeguidos(USUARIO, [ponto('EVACUACAO')], () => AGORA)).toBe(0);
 });
 
-it('registra o alerta mesmo sem permissao de notificacao', async () => {
+it('registra o alerta mesmo sem permissão de notificação', async () => {
   seguindo('NORMAL');
   mockNotificacoes.notificacoesPermitidas.mockResolvedValue(false);
   expect(await verificarPontosSeguidos(USUARIO, [ponto('ATENCAO')], () => AGORA)).toBe(1);
   expect(mockNotificacoes.notificarMudancaDeRisco).not.toHaveBeenCalled();
 });
 
-it('usa o horario da ultima leitura se a API nao informar a deteccao', async () => {
+it('usa o horário da última leitura se a API não informar a detecção', async () => {
   seguindo('NORMAL');
   await verificarPontosSeguidos(USUARIO, [{ ...ponto('ALERTA'), riscoDetectadoEm: null }], () => AGORA);
   expect(mockAlertas.registrarAlerta.mock.calls[0][1].detectadoEm).toBe('2026-11-05T14:01:10Z');

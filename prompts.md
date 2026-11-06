@@ -51,6 +51,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Esta versão do arquivo.
 
+### 7. Corrigir os pontos fracos do código (06/11/2026)
+
+**Pedido:** Corrigir as limitações apontadas na revisão do código antes do primeiro teste no celular.
+
+**Resultado:** Exclusão de conta com confirmação por senha (LGPD), explicação da regra das 2 leituras no Painel e na tela do ponto, chuva simulada salva no AsyncStorage, 21 testes de tela com a React Native Testing Library (129 testes no total) e acentuação dos comentários do código e dos nomes dos testes.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **agente da Defesa Civil**. A tarefa cita como exemplo "cidadão e agente ou profissional".
@@ -66,7 +72,7 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 ## Verificações feitas
 
 - Checagem de tipos (`tsc --noEmit`), lint (`expo lint`) e `expo-doctor` sem erros.
-- 106 testes automatizados passando, também no GitHub Actions.
+- 129 testes automatizados passando, também no GitHub Actions.
 - Teste das telas e dos fluxos principais na versão web do aplicativo.
 
 Ainda falta rodar o aplicativo no celular com o Expo Go. As notificações e a vibração não podem ser testadas no navegador.

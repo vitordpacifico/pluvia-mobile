@@ -1,6 +1,6 @@
 import { somenteDigitos } from './mascaras';
 
-/** Cada funcao devolve a mensagem de erro, ou null quando o valor e valido. */
+/** Cada função devolve a mensagem de erro, ou null quando o valor é válido. */
 export type Validacao = string | null;
 
 export const SENHA_TAMANHO_MINIMO = 8;
@@ -23,7 +23,7 @@ export function validarEmail(email: string): Validacao {
   return null;
 }
 
-/** Aceita fixo (10 digitos) ou celular (11 digitos, comecando com 9 depois do DDD). */
+/** Aceita fixo (10 dígitos) ou celular (11 dígitos, começando com 9 depois do DDD). */
 export function validarTelefone(telefone: string): Validacao {
   const d = somenteDigitos(telefone);
   if (!d) return 'Informe seu telefone.';
@@ -74,7 +74,7 @@ function validarLimite(valor: number | null): Validacao {
   return null;
 }
 
-/** Cada nivel precisa comecar acima do anterior. */
+/** Cada nível precisa começar acima do anterior. */
 export function validarLimites(limites: LimitesDigitados): Record<keyof LimitesDigitados, Validacao> {
   const erros = {
     atencaoCm: validarLimite(limites.atencaoCm),

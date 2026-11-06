@@ -8,7 +8,7 @@ interface Props {
   tipo?: keyof typeof CORES_AVISO;
 }
 
-/** Mensagem destacada. Erros e avisos sao anunciados pelo leitor de tela assim que aparecem. */
+/** Mensagem destacada. Erros e avisos são anunciados pelo leitor de tela assim que aparecem. */
 export function Aviso({ texto, tipo = 'info' }: Props) {
   const cor = CORES_AVISO[tipo];
   const urgente = tipo === 'erro' || tipo === 'aviso';

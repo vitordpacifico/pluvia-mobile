@@ -1,4 +1,4 @@
-/** Mascaras aplicadas enquanto a pessoa digita. Todas aceitam texto colado com outros caracteres. */
+/** Máscaras aplicadas enquanto a pessoa digita. Todas aceitam texto colado com outros caracteres. */
 
 export function somenteDigitos(texto: string): string {
   return texto.replace(/\D/g, '');
@@ -20,7 +20,7 @@ export function mascararCep(texto: string): string {
   return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
 }
 
-/** Ate 3 digitos inteiros e 1 casa decimal, com virgula: 12,5 */
+/** Até 3 dígitos inteiros e 1 casa decimal, com vírgula: 12,5 */
 export function mascararCentimetros(texto: string): string {
   const limpo = texto.replace(/\./g, ',').replace(/[^\d,]/g, '');
   const [inteiro = '', ...resto] = limpo.split(',');
@@ -29,7 +29,7 @@ export function mascararCentimetros(texto: string): string {
   return `${parteInteira},${resto.join('').slice(0, 1)}`;
 }
 
-/** Converte o texto da mascara de centimetros em numero. Vazio ou invalido vira null. */
+/** Converte o texto da máscara de centímetros em número. Vazio ou inválido vira null. */
 export function lerCentimetros(texto: string): number | null {
   if (!texto.trim()) return null;
   const numero = Number(texto.replace(',', '.'));

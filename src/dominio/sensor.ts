@@ -1,13 +1,13 @@
 /**
- * O sensor ultrassonico fica preso acima da rua e mede a distancia ate a superficie.
- * Quanto menor a distancia, mais alta esta a agua.
+ * O sensor ultrassônico fica preso acima da rua e mede a distância até a superfície.
+ * Quanto menor a distância, mais alta está a água.
  *
  *   sensor
- *     |  distancia medida
+ *     |  distância medida
  *     v
- *   ~~~~~~ superficie da agua
- *     |  nivel da agua
- *   ______ chao
+ *   ~~~~~~ superfície da água
+ *     |  nível da água
+ *   ______ chão
  */
 export function nivelPelaDistancia(alturaInstalacaoCm: number, distanciaCm: number): number {
   return Math.max(0, alturaInstalacaoCm - distanciaCm);

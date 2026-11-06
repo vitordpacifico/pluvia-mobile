@@ -69,7 +69,7 @@ export default function TelaCadastro() {
 
     setEnviando(true);
     try {
-      // A permissao e pedida antes: ao cadastrar, a navegacao troca para as abas.
+      // A permissão é pedida antes: ao cadastrar, a navegação troca para as abas.
       await pedirPermissaoDeNotificacao().catch(() => false);
       await cadastrar({ nome, email, telefone, cep, tipoCidadao, senha });
     } catch (e) {

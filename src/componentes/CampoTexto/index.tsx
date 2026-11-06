@@ -10,15 +10,15 @@ interface Props extends Omit<TextInputProps, 'value' | 'onChangeText' | 'style'>
   rotulo: string;
   valor: string;
   onMudar: (texto: string) => void;
-  /** Funcao de mascara aplicada a cada tecla, por exemplo mascararTelefone. */
+  /** Função de máscara aplicada a cada tecla, por exemplo mascararTelefone. */
   mascara?: (texto: string) => string;
   erro?: string | null;
   dica?: string;
-  /** Campo de senha, com botao para mostrar e esconder. */
+  /** Campo de senha, com botão para mostrar e esconder. */
   senha?: boolean;
 }
 
-/** Campo com rotulo visivel, mascara opcional e mensagem de erro anunciada pelo leitor de tela. */
+/** Campo com rótulo visível, máscara opcional e mensagem de erro anunciada pelo leitor de tela. */
 export function CampoTexto({
   rotulo,
   valor,

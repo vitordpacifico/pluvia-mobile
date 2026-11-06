@@ -39,24 +39,24 @@ describe('aplicarRegraDeConfirmacao (duas leituras seguidas)', () => {
     expect(aplicarRegraDeConfirmacao(leituras([2, 30, 2, 2]), LIMITES).risco).toBe('NORMAL');
   });
 
-  it('muda o risco com duas leituras seguidas no novo nivel', () => {
+  it('muda o risco com duas leituras seguidas no novo nível', () => {
     const resultado = aplicarRegraDeConfirmacao(leituras([2, 30, 31]), LIMITES);
     expect(resultado.risco).toBe('ALERTA');
   });
 
-  it('registra a deteccao na primeira leitura do par', () => {
+  it('registra a detecção na primeira leitura do par', () => {
     const lista = leituras([2, 30, 31]);
     expect(aplicarRegraDeConfirmacao(lista, LIMITES).detectadoEm).toBe(lista[1].medidoEm);
   });
 
-  it('acompanha a subida e a descida da agua', () => {
+  it('acompanha a subida e a descida da água', () => {
     const sobe = leituras([2, 12, 13, 27, 28, 45, 46]);
     expect(aplicarRegraDeConfirmacao(sobe, LIMITES).risco).toBe('EVACUACAO');
     const desce = leituras([45, 46, 30, 29, 3, 2]);
     expect(aplicarRegraDeConfirmacao(desce, LIMITES).risco).toBe('NORMAL');
   });
 
-  it('nao muda nada sem leituras suficientes', () => {
+  it('não muda nada sem leituras suficientes', () => {
     expect(aplicarRegraDeConfirmacao([], LIMITES)).toEqual({ risco: 'NORMAL', detectadoEm: null });
     expect(aplicarRegraDeConfirmacao(leituras([50]), LIMITES).risco).toBe('NORMAL');
   });
@@ -68,7 +68,7 @@ describe('utilitarios de risco', () => {
     expect(gravidade('ALERTA')).toBeLessThan(gravidade('EVACUACAO'));
   });
 
-  it('reconhece so os niveis validos', () => {
+  it('reconhece só os níveis válidos', () => {
     expect(ehNivelRisco('ALERTA')).toBe(true);
     expect(ehNivelRisco('alerta')).toBe(false);
     expect(ehNivelRisco(3)).toBe(false);
@@ -83,18 +83,18 @@ describe('utilitarios de risco', () => {
 });
 
 describe('indicadores', () => {
-  it('mede o tempo entre a deteccao e a chegada do alerta', () => {
+  it('mede o tempo entre a detecção e a chegada do alerta', () => {
     expect(tempoAteReceber({ detectadoEm: '2026-11-05T14:00:00Z', recebidoEm: '2026-11-05T14:00:11Z' })).toBe(11_000);
   });
 
-  it('conta os pontos por nivel', () => {
+  it('conta os pontos por nível', () => {
     const pontos = ['NORMAL', 'ALERTA', 'ALERTA'].map((r) => ({ risco: r }) as PontoMonitorado);
     expect(contarPorNivel(pontos)).toEqual({ NORMAL: 1, ATENCAO: 0, ALERTA: 2, EVACUACAO: 0 });
   });
 });
 
-describe('sensor ultrassonico', () => {
-  it('calcula o nivel pela distancia ate a agua', () => {
+describe('sensor ultrassônico', () => {
+  it('calcula o nível pela distância até a água', () => {
     expect(nivelPelaDistancia(250, 250)).toBe(0);
     expect(nivelPelaDistancia(250, 210)).toBe(40);
     expect(nivelPelaDistancia(250, 260)).toBe(0);

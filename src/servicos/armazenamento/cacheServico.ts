@@ -2,7 +2,7 @@ import type { PontoMonitorado } from '@/dominio/tipos';
 
 import { CHAVES, lerJSON, salvarJSON } from './armazenamento';
 
-/** Ultima situacao conhecida dos pontos, para o app continuar mostrando algo sem conexao. */
+/** Última situação conhecida dos pontos, para o app continuar mostrando algo sem conexão. */
 interface CopiaPontos {
   pontos: PontoMonitorado[];
   salvoEm: string;

@@ -12,7 +12,7 @@ import {
 import { notificacoesPermitidas, notificarMudancaDeRisco } from './notificacoes';
 
 /**
- * Compara o risco de cada ponto seguido com o ultimo risco conhecido.
+ * Compara o risco de cada ponto seguido com o último risco conhecido.
  * Quando piora, registra o alerta, notifica, vibra e avisa o leitor de tela.
  * Devolve quantos alertas novos foram criados.
  */
