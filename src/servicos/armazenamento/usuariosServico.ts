@@ -4,12 +4,19 @@ import type { TipoCidadao, Usuario } from '@/dominio/usuario';
 import { calcularHashSenha, gerarSal, senhaConfere } from '@/servicos/seguranca/senha';
 
 import { atualizarLista, CHAVES, lerLista, remover } from './armazenamento';
+import { apagarProtegido, guardarProtegido, lerProtegido, type DadosProtegidos } from './cofre';
 
-/** Conta como fica salva: os dados do usuário mais o sal e o hash da senha. */
-interface ContaSalva extends Usuario {
+/**
+ * Conta como fica salva no AsyncStorage: os dados do usuário sem o telefone e o CEP,
+ * que vão para o cofre, mais o sal e o hash da senha.
+ */
+interface ContaSalva extends Omit<Usuario, keyof DadosProtegidos> {
   sal: string;
   senhaHash: string;
 }
+
+/** Formato antigo, de antes do cofre: o telefone e o CEP ficavam junto da conta. */
+type ContaAntiga = ContaSalva & DadosProtegidos;
 
 export interface DadosCadastroCidadao {
   nome: string;
@@ -56,24 +63,54 @@ export function normalizarEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function paraUsuario(conta: ContaSalva): Usuario {
+/** Junta a conta salva com os dados do cofre e tira o sal e o hash, que as telas não usam. */
+async function paraUsuario(conta: ContaSalva): Promise<Usuario> {
   const { sal: _sal, senhaHash: _hash, ...usuario } = conta;
-  return usuario;
+  if (usuario.perfil !== 'cidadao') return usuario;
+  return { ...usuario, ...(await lerProtegido(conta.id)) };
 }
 
+/** Separa o telefone e o CEP do resto, para cada parte ir ao seu lugar. */
+function separarProtegidos<T extends DadosProtegidos>(dados: T): [Omit<T, keyof DadosProtegidos>, DadosProtegidos] {
+  const { telefone, cep, ...resto } = dados;
+  const protegidos: DadosProtegidos = {};
+  if (telefone !== undefined) protegidos.telefone = telefone;
+  if (cep !== undefined) protegidos.cep = cep;
+  return [resto, protegidos];
+}
+
+/** Cria a conta e já guarda o telefone e o CEP no cofre. */
 async function montarConta(dados: Omit<Usuario, 'id' | 'criadoEm'>, senha: string): Promise<ContaSalva> {
+  const [publicos, protegidos] = separarProtegidos(dados);
   const sal = gerarSal();
-  return {
-    ...dados,
+  const conta: ContaSalva = {
+    ...publicos,
     id: Crypto.randomUUID(),
     email: normalizarEmail(dados.email),
     criadoEm: new Date().toISOString(),
     sal,
     senhaHash: await calcularHashSenha(senha, sal),
   };
+  if (Object.keys(protegidos).length > 0) await guardarProtegido(conta.id, protegidos);
+  return conta;
+}
+
+/** Move para o cofre o telefone e o CEP de contas salvas antes dele existir. */
+async function migrarContasAntigas(): Promise<void> {
+  const contas = await lerLista<ContaAntiga>(CHAVES.contas);
+  const antigas = contas.filter((conta) => conta.telefone !== undefined || conta.cep !== undefined);
+  if (antigas.length === 0) return;
+
+  for (const conta of antigas) {
+    await guardarProtegido(conta.id, separarProtegidos(conta)[1]);
+  }
+  await atualizarLista<ContaAntiga>(CHAVES.contas, (atuais) =>
+    atuais.map((conta) => separarProtegidos(conta)[0]),
+  );
 }
 
 export async function garantirContasDemonstracao(): Promise<void> {
+  await migrarContasAntigas();
   const existentes = await lerLista<ContaSalva>(CHAVES.contas);
   const faltando = CONTAS_DEMONSTRACAO.filter(
     (demo) => !existentes.some((conta) => conta.email === demo.email),
@@ -126,8 +163,15 @@ export async function atualizarCidadao(
   id: string,
   dados: DadosAtualizacaoCidadao,
 ): Promise<Usuario> {
+  // Só estes campos podem mudar: e-mail, perfil e senha ficam como estão.
+  const publicos = { nome: dados.nome.trim(), tipoCidadao: dados.tipoCidadao };
+  const protegidos: DadosProtegidos = { telefone: dados.telefone, cep: dados.cep };
+  const existentes = await lerLista<ContaSalva>(CHAVES.contas);
+  if (!existentes.some((c) => c.id === id)) throw new ErroCadastro('Conta não encontrada.');
+
+  await guardarProtegido(id, protegidos);
   const contas = await atualizarLista<ContaSalva>(CHAVES.contas, (atuais) =>
-    atuais.map((c) => (c.id === id ? { ...c, ...dados, nome: dados.nome.trim() } : c)),
+    atuais.map((c) => (c.id === id ? { ...c, ...publicos } : c)),
   );
   const conta = contas.find((c) => c.id === id);
   if (!conta) throw new ErroCadastro('Conta não encontrada.');
@@ -135,10 +179,14 @@ export async function atualizarCidadao(
 }
 
 /**
- * Apaga a conta e todos os dados dela neste celular: pontos acompanhados e alertas.
+ * Apaga a conta e todos os dados dela neste celular: telefone e CEP do cofre, pontos acompanhados e alertas.
  * Atende ao direito de eliminação dos dados previsto na LGPD.
  */
 export async function excluirConta(id: string): Promise<void> {
   await atualizarLista<ContaSalva>(CHAVES.contas, (contas) => contas.filter((c) => c.id !== id));
-  await Promise.all([remover(CHAVES.pontosSeguidos(id)), remover(CHAVES.alertas(id))]);
+  await Promise.all([
+    apagarProtegido(id),
+    remover(CHAVES.pontosSeguidos(id)),
+    remover(CHAVES.alertas(id)),
+  ]);
 }

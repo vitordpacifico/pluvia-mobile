@@ -57,6 +57,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Exclusão de conta com confirmação por senha (LGPD), explicação da regra das 2 leituras no Painel e na tela do ponto, chuva simulada salva no AsyncStorage, 21 testes de tela com a React Native Testing Library (129 testes no total) e acentuação dos comentários do código e dos nomes dos testes.
 
+### 8. Criptografar os dados de contato (06/11/2026)
+
+**Pedido:** Corrigir o ponto apontado pela auditoria de Cybersecurity: o telefone e o CEP do cidadão eram salvos no AsyncStorage sem criptografia.
+
+**Resultado:** Telefone e CEP movidos para o cofre do sistema (`expo-secure-store`), com migração das contas já salvas, remoção do cofre na exclusão de conta e 5 testes novos (134 no total).
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **agente da Defesa Civil**. A tarefa cita como exemplo "cidadão e agente ou profissional".
@@ -67,12 +73,13 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 - A regra das duas leituras seguidas também vale quando o risco diminui.
 - Limites de exemplo: 10, 25 e 40 cm.
 - Contrato da API em `docs/API.md`.
+- Telefone e CEP no cofre do sistema; nome e e-mail no armazenamento comum, porque o e-mail é usado para achar a conta no login.
 - Ícone próprio: gota de água em fundo azul.
 
 ## Verificações feitas
 
 - Checagem de tipos (`tsc --noEmit`), lint (`expo lint`) e `expo-doctor` sem erros.
-- 129 testes automatizados passando, também no GitHub Actions.
+- 134 testes automatizados passando.
 - Teste das telas e dos fluxos principais na versão web do aplicativo.
 
 Ainda falta rodar o aplicativo no celular com o Expo Go. As notificações e a vibração não podem ser testadas no navegador.

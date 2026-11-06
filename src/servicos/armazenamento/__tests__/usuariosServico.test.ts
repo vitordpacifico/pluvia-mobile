@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import { CHAVES } from '../armazenamento';
 import { encerrarSessao, iniciarSessao, lerSessao } from '../sessaoServico';
@@ -95,4 +96,59 @@ it('exclui a conta e os dados dela, sem mexer nas outras contas', async () => {
   expect(await AsyncStorage.getItem(CHAVES.alertas(ana.id))).toBeNull();
   expect(await AsyncStorage.getItem(CHAVES.pontosSeguidos(ana.id))).toBeNull();
   expect(await obterUsuario(bia.id)).not.toBeNull();
+});
+
+describe('cofre do telefone e do CEP', () => {
+  it('guarda o telefone e o CEP no cofre, nunca no AsyncStorage', async () => {
+    const usuario = await cadastrarCidadao(DADOS);
+
+    const salvo = (await AsyncStorage.getItem(CHAVES.contas)) ?? '';
+    expect(salvo).not.toContain('91234-5678');
+    expect(salvo).not.toContain('01001-000');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+      `sentinela.protegido.${usuario.id}`,
+      expect.stringContaining('91234-5678'),
+      expect.objectContaining({ keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY }),
+    );
+    expect(await obterUsuario(usuario.id)).toMatchObject({ telefone: '(11) 91234-5678', cep: '01001-000' });
+  });
+
+  it('atualiza o telefone e o CEP só no cofre', async () => {
+    const usuario = await cadastrarCidadao(DADOS);
+    const { email: _email, senha: _senha, ...edicao } = DADOS;
+    await atualizarCidadao(usuario.id, { ...edicao, telefone: '(21) 3456-7890', cep: '20000-000' });
+
+    expect(await AsyncStorage.getItem(CHAVES.contas)).not.toContain('3456-7890');
+    expect(await autenticar('ana@email.com', 'Senha123')).toMatchObject({
+      telefone: '(21) 3456-7890',
+      cep: '20000-000',
+    });
+  });
+
+  it('move para o cofre os dados de contas salvas antes dele', async () => {
+    const usuario = await cadastrarCidadao(DADOS);
+    await SecureStore.deleteItemAsync(`sentinela.protegido.${usuario.id}`);
+    const contas = JSON.parse((await AsyncStorage.getItem(CHAVES.contas)) ?? '[]');
+    contas[0] = { ...contas[0], telefone: '(11) 98888-7777', cep: '04000-000' };
+    await AsyncStorage.setItem(CHAVES.contas, JSON.stringify(contas));
+
+    await garantirContasDemonstracao();
+
+    expect(await AsyncStorage.getItem(CHAVES.contas)).not.toContain('98888-7777');
+    expect(await obterUsuario(usuario.id)).toMatchObject({ telefone: '(11) 98888-7777', cep: '04000-000' });
+  });
+
+  it('apaga o cofre ao excluir a conta', async () => {
+    const usuario = await cadastrarCidadao(DADOS);
+    await excluirConta(usuario.id);
+    expect(await SecureStore.getItemAsync(`sentinela.protegido.${usuario.id}`)).toBeNull();
+  });
+
+  it('não cria cofre para o agente', async () => {
+    await garantirContasDemonstracao();
+    const agente = await autenticar('agente@sentinela.demo', 'Agente123');
+    expect(agente).not.toHaveProperty('telefone');
+    const cidada = await autenticar('cidadao@sentinela.demo', 'Cidadao123');
+    expect(cidada).toMatchObject({ telefone: '(11) 91234-5678' });
+  });
 });

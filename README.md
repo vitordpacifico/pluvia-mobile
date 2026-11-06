@@ -117,7 +117,7 @@ Também é possível criar uma conta de cidadão em **Criar conta**. Agentes nã
 |---|---|
 | **Telas e navegação** | Expo Router com 8 telas. Rotas protegidas por login (`Stack.Protected`) e por perfil: o cidadão vê a aba Alertas, e o agente vê o Painel e o ajuste de limites. A notificação abre o ponto que gerou o alerta. |
 | **Consumo de dados (mock ou simulação IoT)** | `src/servicos/dados/simulacao.ts` imita um ESP32 com sensor ultrassônico: mede a distância até a água a cada 10 s, com ruído, e calcula o nível. A simulação gera alertas, notificações e vibração. O agente pode provocar uma chuva forte em qualquer ponto. O cliente da API real (`api.ts`) segue o mesmo contrato, com validação de cada resposta. |
-| **Persistência (AsyncStorage)** | Camada de serviço em `src/servicos/armazenamento/`: contas, sessão, pontos seguidos, alertas, cópia offline dos pontos, limites ajustados e chuvas simuladas, que continuam depois de fechar o app. Só `armazenamento.ts` acessa o AsyncStorage diretamente. |
+| **Persistência (AsyncStorage)** | Camada de serviço em `src/servicos/armazenamento/`: contas, sessão, pontos seguidos, alertas, cópia offline dos pontos, limites ajustados e chuvas simuladas, que continuam depois de fechar o app. Só `armazenamento.ts` acessa o AsyncStorage diretamente. O telefone e o CEP não vão para o AsyncStorage: ficam no cofre do sistema (`cofre.ts`, veja Segurança). |
 | **Acessibilidade** | Veja a seção abaixo |
 | **Aderência ao problema** | Avisa quando o risco piora e diz o que fazer em cada nível. Mede o indicador de impacto do grupo e avisa quando o sensor para de enviar dados. Dá ao agente a visão de todos os pontos. |
 | **Documentação** | Este README, o contrato da API ([docs/API.md](docs/API.md)), o roteiro do vídeo e o `prompts.md` |
@@ -133,7 +133,8 @@ src/
   componentes/         Componentes reutilizáveis: index.tsx + estilos.ts
   contexto/            Context API: autenticação, dados dos pontos e alertas
   servicos/
-    armazenamento/     AsyncStorage: contas, sessão, alertas, pontos seguidos, cópia offline
+    armazenamento/     AsyncStorage: contas, sessão, alertas, pontos seguidos, cópia offline;
+                       cofre do sistema (SecureStore) para telefone e CEP
     dados/             Simulação IoT, cliente da API e escolha da fonte
     alertas/           Monitor de risco e notificações
     seguranca/         Hash das senhas
@@ -191,7 +192,8 @@ flowchart LR
 - A senha nunca é salva em texto. O app guarda um sal aleatório e o hash SHA-256 de sal + senha.
 - A comparação do hash leva o mesmo tempo, encontre ou não uma diferença.
 - O login bloqueia por 30 segundos depois de 5 senhas erradas seguidas.
-- A exclusão de conta pede a senha de novo e apaga a conta, os pontos acompanhados e os alertas do celular, atendendo ao direito de eliminação dos dados da LGPD.
+- O telefone e o CEP ficam no cofre do sistema (`expo-secure-store`: Keychain no iOS, Keystore no Android), criptografados e presos ao aparelho. O AsyncStorage, que guarda em texto aberto, fica só com nome, e-mail, perfil e o hash da senha. Contas salvas antes do cofre têm esses dados movidos para ele na abertura do app. A versão web, usada só nos prints, não tem cofre e guarda no armazenamento do navegador.
+- A exclusão de conta pede a senha de novo e apaga a conta, o telefone e o CEP do cofre, os pontos acompanhados e os alertas do celular, atendendo ao direito de eliminação dos dados da LGPD.
 - **Limite conhecido:** o login é local porque a API ainda não existe. Em produção, a autenticação ficaria no servidor, com bcrypt ou Argon2.
 
 ### Notificações
@@ -227,7 +229,7 @@ npm run typecheck
 npm run lint
 ```
 
-São 129 testes automatizados, divididos em duas camadas:
+São 134 testes automatizados, divididos em duas camadas:
 
 - **Lógica:** máscaras, validações, contas e senhas, exclusão de conta, armazenamento, regra de risco, simulação IoT, cliente da API e criação de alertas.
 - **Telas** (React Native Testing Library): login com bloqueio por tentativas, cadastro com máscaras e erros, ajuste de limites, painel do agente e exclusão de conta.

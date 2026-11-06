@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 /**
  * Único ponto do app que conversa com o AsyncStorage.
  * Os outros serviços usam estas funções e nunca acessam o AsyncStorage diretamente.
+ * O AsyncStorage guarda em texto aberto: telefone e CEP não passam por aqui, vão para o cofre (cofre.ts).
  */
 
 const PREFIXO = '@sentinela';

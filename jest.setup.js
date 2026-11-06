@@ -4,6 +4,21 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
+// Cofre falso em memória, no lugar do Keychain e do Keystore.
+jest.mock('expo-secure-store', () => {
+  const cofre = new Map();
+  return {
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+    setItemAsync: jest.fn(async (chave, valor) => {
+      cofre.set(chave, valor);
+    }),
+    getItemAsync: jest.fn(async (chave) => cofre.get(chave) ?? null),
+    deleteItemAsync: jest.fn(async (chave) => {
+      cofre.delete(chave);
+    }),
+  };
+});
+
 jest.mock('expo-crypto', () => {
   const crypto = require('crypto');
   return {
