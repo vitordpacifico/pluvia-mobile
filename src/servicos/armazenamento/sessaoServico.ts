@@ -1,0 +1,20 @@
+import { CHAVES, lerJSON, remover, salvarJSON } from './armazenamento';
+
+/** Mantem a pessoa logada depois de fechar o app. Guarda so o id, nunca a senha. */
+interface Sessao {
+  usuarioId: string;
+  iniciadaEm: string;
+}
+
+export async function iniciarSessao(usuarioId: string): Promise<void> {
+  await salvarJSON(CHAVES.sessao, { usuarioId, iniciadaEm: new Date().toISOString() });
+}
+
+export async function lerSessao(): Promise<Sessao | null> {
+  const sessao = await lerJSON<Sessao | null>(CHAVES.sessao, null);
+  return sessao && typeof sessao.usuarioId === 'string' ? sessao : null;
+}
+
+export async function encerrarSessao(): Promise<void> {
+  await remover(CHAVES.sessao);
+}
