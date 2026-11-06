@@ -1,71 +1,77 @@
 # Uso de IA
 
-O PDF da GS pede o registro dos prompts usados. Ferramenta: Claude Code (Claude Opus 5.5).
+As regras gerais da Global Solution pedem o registro dos prompts usados (página 21 do PDF da GS).
+
+**Ferramenta:** Claude Code (modelo Claude Opus 5.5).
+
+Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de cada um.
 
 ## Prompts
 
-### 05/11/2026: validar a ideia
+### 1. Validar a ideia (05/11/2026)
 
-O grupo enviou o documento de contexto do SENTINELA (problema, arquitetura, níveis de risco, indicador e ODS) e perguntou:
+**Pedido:** O grupo apresentou o documento de contexto do SENTINELA (problema, arquitetura, níveis de risco, indicador de impacto e ODS) e perguntou se a proposta fazia sentido para a Global Solution.
 
-> pensamos nisso pra essa Global Solution, faz sentido?
+**Resultado:** Análise de como o tema atende cada disciplina, com os riscos encontrados: a disponibilidade de dados públicos reais para a disciplina de IA, o nome igual ao de outro projeto do grupo, as limitações de notificação no Expo Go e a conexão entre o simulador Wokwi e a API.
 
-Resultado: análise de como o tema atende cada disciplina e dos riscos, como os dados reais para ML e as notificações no Expo Go.
+### 2. Criar o app (05/11/2026)
 
-### 05/11/2026: criar o app
+**Pedido:** Criar o aplicativo do SENTINELA em Expo, usando dados simulados enquanto a API não existe.
 
-> Sim, comece
+**Resultado:** Projeto Expo com as telas, a simulação do sensor, a persistência local, as notificações locais, a proposta de contrato da API e o README.
 
-(resposta a "Começo o app do SENTINELA no GS-Mobile, usando dados simulados?")
+### 3. Melhorar o app (05/11/2026)
 
-Resultado: a IA criou o projeto Expo, as telas, a simulação, a persistência local, as notificações locais, o contrato proposto da API e o README.
+**Pedido:** Melhorar o aplicativo para atender da melhor forma possível os critérios de avaliação.
 
-### 05/11/2026: melhorar o app
+**Resultado:** Cópia dos pontos salva no celular para uso sem conexão, contador de alertas pendentes, vibração no alerta, tratamento de erros nas telas, ícone próprio, testes automatizados e roteiro do vídeo.
 
-> quero que melhore o de mobile, pq preciso tirar 100 ele precisa estar perfeito.
+### 4. Adequar à tarefa do Teams (06/11/2026)
 
-Resultado: cópia offline dos pontos, contador de alertas pendentes, vibração no alerta, tratamento de erros, ícone próprio, testes automatizados e roteiro do vídeo.
+**Pedido:** Adequar o aplicativo às instruções da tarefa publicada no Teams. Elas pedem login com perfis de usuário pela Context API, formulários com validação e máscaras, simulação IoT, persistência com AsyncStorage em camada de serviço e estilos separados das telas.
 
-### 06/11/2026: adequar à tarefa do Teams
+**Resultado:**
 
-O grupo enviou um print das instruções da tarefa no Teams, que pedem login com perfis, Context API, máscaras, simulação IoT, AsyncStorage em camada de serviço e estilos separados.
+- Troca do SQLite pelo AsyncStorage, em uma camada de serviço.
+- Login com dois perfis (cidadão e agente da Defesa Civil) pela Context API, com a senha guardada como hash.
+- Cadastro com máscaras de celular e CEP e validação em cada campo.
+- Painel do agente, ajuste dos limites de risco e controle da simulação IoT.
+- Código separado em camadas (telas, componentes, contexto, serviços e estilos), com um `estilos.ts` para cada tela e componente.
+- Ampliação dos testes automatizados para 106.
 
-Resultado: a IA reorganizou o app para atender a tarefa:
+### 5. Completar a entrega e publicar (06/11/2026)
 
-- Trocou o SQLite pelo AsyncStorage, em uma camada de serviço.
-- Criou o login com dois perfis (cidadão e agente da Defesa Civil), pela Context API, com senha guardada como hash.
-- Criou o cadastro com máscaras de celular e CEP e validação em cada campo.
-- Criou o painel do agente, o ajuste de limites e o controle da simulação IoT.
-- Separou o código em camadas (telas, componentes, contexto, serviços, estilos) e cada tela e componente com o próprio `estilos.ts`.
-- Ampliou os testes para 106.
+**Pedido:** Completar os itens pendentes da entrega, melhorar o acabamento do aplicativo e publicar o repositório no GitHub.
 
-### 06/11/2026: completar a entrega e publicar
+**Resultado:** README com o link do repositório, a tabela do grupo e a galeria de prints. Prints gerados a partir da versão web do aplicativo. Correção de dois problemas visuais encontrados nos prints: os rótulos do gráfico cobertos pelas barras e o texto das abas. Verificação automática no GitHub Actions e publicação do repositório.
 
-> antes de eu sequer testar e rodar, vc consegue arrumar oq der nos incompletos, e melhorar ainda mais o sprint de mobile p entrega ficar show? ja criar o repo no github e etc
+### 6. Revisar este registro (06/11/2026)
 
-Resultado: a IA completou o README (link do repositório, tabela do grupo, galeria de prints), gerou os prints pela versão web do app com um script automatizado, corrigiu dois problemas visuais vistos nos prints (rótulos do gráfico cobertos pelas barras e texto das abas), adicionou a verificação automática no GitHub Actions e publicou o repositório.
+**Pedido:** Reescrever este arquivo em linguagem formal, sem mudar o conteúdo dos pedidos.
 
-## Decisões tomadas pela IA, para o grupo revisar
+**Resultado:** Esta versão do arquivo.
 
-- Segundo perfil: **agente da Defesa Civil**. A tarefa dá como exemplo "cidadão e agente ou profissional".
-- O agente não se cadastra pelo app: duas contas de demonstração são criadas no primeiro uso.
+## Decisões sugeridas pela IA, para o grupo revisar
+
+- Segundo perfil: **agente da Defesa Civil**. A tarefa cita como exemplo "cidadão e agente ou profissional".
+- O agente não se cadastra pelo app. Duas contas de demonstração são criadas no primeiro uso.
 - Login local, com hash SHA-256 e sal, porque a API ainda não existe.
 - Cadastro do cidadão com nome, e-mail, celular, CEP, tipo (morador ou comerciante) e senha. Não pede CPF.
-- Notificações locais com consulta a cada 10 segundos, em vez de push.
-- Mesma regra das duas leituras também na descida do risco.
+- Notificações locais, com consulta a cada 10 segundos, em vez de notificações enviadas pelo servidor.
+- A regra das duas leituras seguidas também vale quando o risco diminui.
 - Limites de exemplo: 10, 25 e 40 cm.
 - Contrato da API em `docs/API.md`.
 - Ícone próprio: gota de água em fundo azul.
 
-## Validação feita pela IA
+## Verificações feitas
 
-- `tsc --noEmit`, `expo lint` e `expo-doctor` sem erros.
-- 106 testes automatizados passando.
-- Teste no navegador, em uma cópia web do projeto.
+- Checagem de tipos (`tsc --noEmit`), lint (`expo lint`) e `expo-doctor` sem erros.
+- 106 testes automatizados passando, também no GitHub Actions.
+- Teste das telas e dos fluxos principais na versão web do aplicativo.
 
-Ainda falta rodar no celular com o Expo Go. As notificações e a vibração não podem ser testadas no navegador.
+Ainda falta rodar o aplicativo no celular com o Expo Go. As notificações e a vibração não podem ser testadas no navegador.
 
 ## Revisão humana
 
-- [ ] Rodado no celular
+- [ ] Aplicativo testado no celular
 - [ ] Cada arquivo lido e explicado pelo grupo
