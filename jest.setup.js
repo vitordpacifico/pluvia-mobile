@@ -61,10 +61,18 @@ jest.mock('expo-image-picker', () => ({
   launchImageLibraryAsync: jest.fn(async () => ({ canceled: true, assets: [] })),
 }));
 
-jest.mock('expo-image-manipulator', () => ({
-  SaveFormat: { JPEG: 'jpeg' },
-  manipulateAsync: jest.fn(async () => ({ uri: 'file:///foto-limpa.jpg', width: 1280, height: 960 })),
-}));
+jest.mock('expo-image-manipulator', () => {
+  const contexto = {
+    resize: jest.fn(() => contexto),
+    renderAsync: jest.fn(async () => ({
+      saveAsync: jest.fn(async () => ({ uri: 'file:///foto-limpa.jpg', width: 1280, height: 960 })),
+    })),
+  };
+  return {
+    SaveFormat: { JPEG: 'jpeg' },
+    ImageManipulator: { manipulate: jest.fn(() => contexto) },
+  };
+});
 
 jest.mock('react-native-maps', () => {
   const { View } = require('react-native');

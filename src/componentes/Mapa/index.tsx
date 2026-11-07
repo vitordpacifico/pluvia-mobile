@@ -9,7 +9,7 @@ import { estadoExibido, INFO_ESTADO, type Ocorrencia } from '@/dominio/ocorrenci
 import { INFO_FAIXA, type RiscoEstimado } from '@/dominio/riscoEstimado';
 import { cores } from '@/estilos/tema';
 
-import { COR_AREA_RISCO, estilos } from './estilos';
+import { COR_AREA_RISCO, COR_PINO, estilos } from './estilos';
 
 export interface PropsMapa {
   centro: Coordenada;
@@ -75,14 +75,15 @@ export function Mapa({ centro, ocorrencias, riscos, locais, onSelecionar }: Prop
           </Marker>
         ))}
         {ocorrencias.map((ocorrencia) => {
-          const info = INFO_ESTADO[estadoExibido(ocorrencia)];
+          const estado = estadoExibido(ocorrencia);
+          const info = INFO_ESTADO[estado];
           return (
             <Marker
               key={ocorrencia.id}
               coordinate={ocorrencia.local}
               title={`${ocorrencia.titulo}: ${info.rotulo}`}
               description={`${ocorrencia.referencia}, ${ocorrencia.bairro}`}
-              pinColor={info.corFundo}
+              pinColor={COR_PINO[estado]}
               onCalloutPress={() => onSelecionar(ocorrencia)}
             />
           );

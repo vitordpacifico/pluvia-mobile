@@ -1,6 +1,6 @@
 # Pluvia: alagamentos perto de você
 
-[![Verificações](https://github.com/vitordpacifico/sentinela-mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/vitordpacifico/sentinela-mobile/actions/workflows/ci.yml)
+[![Verificações](https://github.com/vitordpacifico/pluvia-mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/vitordpacifico/pluvia-mobile/actions/workflows/ci.yml)
 
 Entrega de **Mobile Development & IoT** da Global Solution 2026.2 (FIAP, Engenharia de Software, 3º ano), tema CitizenTech.
 
@@ -22,7 +22,7 @@ A solução segue o documento de definição do grupo, que chama a proposta de *
 | Problema, em uma frase | Durante chuvas fortes, as pessoas entram em ruas alagadas sem aviso, deixam o carro em lugares que alagam e não sabem se um alagamento continua ativo, porque a informação está espalhada e sem contexto. |
 | Como funciona | O app reúne ocorrências de fontes identificadas (dados oficiais, sensores de nível e relatos da comunidade) e mostra no mapa o que acontece por perto. A pessoa salva onde estacionou e os lugares que importam, e recebe aviso de alagamento novo, de risco elevado e de encerramento. Relatos com foto passam por uma triagem de IA e por uma equipe antes de serem publicados. |
 | O que cada parte faz | **App (este repositório):** mapa, filtros, meu carro, relatos com foto, avisos e moderação. **ESP32 (Physical Computing):** mede o nível da água e registra o alagamento. **API em C# (C# e SOA):** recebe ocorrências, sensores e relatos. **IA e ML:** triagem das fotos e estimativa de risco por região. **Linux (Operating Systems):** roda a API com monitoramento. **Cybersecurity:** audita os dados pessoais do app. |
-| Link do repositório | https://github.com/vitordpacifico/sentinela-mobile |
+| Link do repositório | https://github.com/vitordpacifico/pluvia-mobile |
 | Indicador de impacto | **Rapidez dos avisos:** tempo entre o registro de um alagamento e a chegada do aviso ao celular. Também: confiabilidade (ocorrências com fonte e horário identificados). |
 | ODS conectados | ODS 11 (Cidades e Comunidades Sustentáveis), ODS 13 (Ação Contra a Mudança Global do Clima) e ODS 9 (Indústria, Inovação e Infraestrutura) |
 
@@ -92,7 +92,7 @@ Também é possível criar uma conta de cidadão em **Criar conta**. A equipe n�
 1. Entre como **cidadão**. O **Mapa** mostra as ocorrências perto do carro, com a legenda dos status e as ruas com risco estimado.
 2. Abra uma ocorrência: fonte, horário, histórico e o aviso de que encerrada não significa liberada.
 3. Na aba **Meu carro**, veja a situação no raio do carro e consulte um bairro em **Onde estacionar?**.
-4. Deixe o app aberto. A chuva simulada no sensor de demonstração 1 se repete a cada 6 minutos: primeiro o app avisa o risco estimado elevado, depois o alagamento perto do carro e, uns 4 minutos depois, o encerramento. Veja tudo na aba **Avisos**.
+4. Deixe o app aberto. A chuva simulada no sensor de demonstração 1 começa quando o app abre e se repete a cada 6 minutos: primeiro o app avisa o risco estimado elevado, depois o alagamento perto do carro e, uns 4 minutos depois, o encerramento. Veja tudo na aba **Avisos**.
 5. Na aba **Relatar**, envie um relato com foto. A tela seguinte mostra a triagem da IA e o status "Em análise".
 6. Saia e entre como **equipe**. Em **Moderação**, abra o relato, confira o contexto e publique. Ele aparece no mapa como relato comunitário.
 7. No **Painel**, simule chuva no sensor 2, ou abra uma ocorrência oficial e marque como encerrada para ver o aviso de encerramento.

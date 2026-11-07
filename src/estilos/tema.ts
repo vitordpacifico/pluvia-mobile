@@ -4,7 +4,7 @@ export const cores = {
   texto: '#1A1C1E',
   textoSecundario: '#454B52',
   borda: '#C4CAD6',
-  primaria: '#0029C7',
+  primaria: '#012AD0',
   destaque: '#5BC4F8',
   textoSobrePrimaria: '#FFFFFF',
   perigo: '#B00020',

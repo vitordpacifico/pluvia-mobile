@@ -83,6 +83,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 - simulação de três sensores ESP32, de uma fonte oficial e do servidor dos relatos;
 - novo contrato da API, novo roteiro do vídeo e 156 testes automatizados.
 
+### 11. Logotipo, nome do repositório e revisão final (07/11/2026)
+
+**Pedido:** Aplicar o logotipo Pluvia, renomear o repositório e revisar se tudo está correto.
+
+**Resultado:** Logotipo na tela de entrar, ícones do app gerados a partir dele e cor principal igual ao azul do logotipo. Repositório renomeado para `pluvia-mobile`. Na revisão: troca de uma função obsoleta do `expo-image-manipulator`, cores de pino que o Android consegue mostrar, legenda dos pinos e a chuva do sensor 1 recomeçando sempre que o app abre.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.

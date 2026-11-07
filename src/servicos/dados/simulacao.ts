@@ -185,13 +185,14 @@ function carregarEstado(): Promise<void> {
       const chuvas = Object.fromEntries(
         Object.entries(salvo?.chuvas ?? {}).filter(([, chuva]) => ehChuva(chuva)),
       );
-      estado =
-        Object.keys(chuvas).length > 0
-          ? { chuvas, encerradas: { ...(salvo?.encerradas ?? {}) } }
-          : estadoPadrao(Date.now());
+      const padrao = estadoPadrao(inicioSessao);
+      estado = {
+        chuvas: { ...chuvas, ...padrao.chuvas },
+        encerradas: { ...(salvo?.encerradas ?? {}) },
+      };
     })
     .catch(() => {
-      estado = estadoPadrao(Date.now());
+      estado = estadoPadrao(inicioSessao);
     });
   return carregamento;
 }

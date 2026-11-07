@@ -7,7 +7,7 @@ A tarefa pede um vídeo de até 3 minutos com o app rodando. O roteiro segue a d
 1. Limpe os dados do Expo Go, ou desinstale e reinstale o app, para começar sem conta logada.
 2. Deixe o celular com internet, localização e som ligados.
 3. Tenha à mão uma foto de rua molhada ou alagada, ou fotografe uma poça no caminho.
-4. Ensaie uma vez: a chuva simulada no sensor 1 começa quando o app abre pela primeira vez e se repete a cada 6 minutos. O alagamento aparece cerca de 1 minuto e meio depois do início.
+4. Ensaie uma vez: a chuva simulada no sensor 1 começa sempre que o app abre e se repete a cada 6 minutos. O alagamento aparece cerca de 1 minuto e meio depois do início.
 
 ## Roteiro
 

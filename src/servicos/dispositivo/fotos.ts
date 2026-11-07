@@ -1,4 +1,4 @@
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
 export class ErroFoto extends Error {}
@@ -8,11 +8,10 @@ export type OrigemFoto = 'camera' | 'galeria';
 const LARGURA_MAXIMA = 1280;
 
 export async function limparFoto(uri: string, largura: number): Promise<string> {
-  const resultado = await manipulateAsync(
-    uri,
-    largura > LARGURA_MAXIMA ? [{ resize: { width: LARGURA_MAXIMA } }] : [],
-    { compress: 0.7, format: SaveFormat.JPEG },
-  );
+  const contexto = ImageManipulator.manipulate(uri);
+  if (largura > LARGURA_MAXIMA) contexto.resize({ width: LARGURA_MAXIMA });
+  const imagem = await contexto.renderAsync();
+  const resultado = await imagem.saveAsync({ compress: 0.7, format: SaveFormat.JPEG });
   return resultado.uri;
 }
 

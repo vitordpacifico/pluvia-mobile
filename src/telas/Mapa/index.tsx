@@ -220,6 +220,12 @@ export default function TelaMapa() {
               onSelecionar={(o) => router.push({ pathname: '/ocorrencia/[id]', params: { id: o.id } })}
             />
           )}
+          {mostrarMapa && (
+            <Text style={estilos.nota}>
+              Pinos: vermelho, ativo; laranja, relato comunitário; verde, encerrado; roxo, sem dados recentes. O
+              círculo azul é o raio do seu carro. Toque no pino e depois no balão para abrir.
+            </Text>
+          )}
 
           <View style={estilos.legenda} accessibilityLabel="Legenda das situações">
             {ESTADOS_LEGENDA.map((estado) => (

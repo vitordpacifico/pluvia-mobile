@@ -1,16 +1,7 @@
 import { StyleSheet } from 'react-native';
 
-import { cores, raio } from '@/estilos/tema';
+import { raio } from '@/estilos/tema';
 
 export const estilos = StyleSheet.create({
-  marca: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: raio.g,
-    backgroundColor: cores.primaria,
-  },
-  nome: { fontSize: 40, fontWeight: '800', color: cores.textoSobrePrimaria },
+  logo: { width: 260, height: 149, borderRadius: raio.g },
 });
