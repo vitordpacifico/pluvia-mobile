@@ -1,18 +1,20 @@
-import type { PontoMonitorado } from '@/dominio/tipos';
+import type { Ocorrencia } from '@/dominio/ocorrencia';
+import type { RiscoEstimado } from '@/dominio/riscoEstimado';
 
 import { CHAVES, lerJSON, salvarJSON } from './armazenamento';
 
-interface CopiaPontos {
-  pontos: PontoMonitorado[];
+export interface CopiaMapa {
+  ocorrencias: Ocorrencia[];
+  riscos: RiscoEstimado[];
   salvoEm: string;
 }
 
-export async function salvarCopiaPontos(pontos: PontoMonitorado[], salvoEm: Date): Promise<void> {
-  await salvarJSON(CHAVES.cachePontos, { pontos, salvoEm: salvoEm.toISOString() });
+export async function salvarCopiaMapa(copia: CopiaMapa): Promise<void> {
+  await salvarJSON(CHAVES.cacheMapa, copia);
 }
 
-export async function lerCopiaPontos(): Promise<{ pontos: PontoMonitorado[]; salvoEm: Date } | null> {
-  const copia = await lerJSON<CopiaPontos | null>(CHAVES.cachePontos, null);
-  if (!copia || !Array.isArray(copia.pontos) || copia.pontos.length === 0) return null;
-  return { pontos: copia.pontos, salvoEm: new Date(copia.salvoEm) };
+export async function lerCopiaMapa(): Promise<CopiaMapa | null> {
+  const copia = await lerJSON<CopiaMapa | null>(CHAVES.cacheMapa, null);
+  if (!copia || !Array.isArray(copia.ocorrencias) || !Array.isArray(copia.riscos)) return null;
+  return copia;
 }

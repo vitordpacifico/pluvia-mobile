@@ -12,7 +12,7 @@ async function abrirTela() {
       <TelaEntrar />
     </AutenticacaoProvider>,
   );
-  await waitFor(async () => expect(await AsyncStorage.getItem('@sentinela:contas')).not.toBeNull());
+  await waitFor(async () => expect(await AsyncStorage.getItem('@pluvia:contas')).not.toBeNull());
 }
 
 async function entrarCom(email: string, senha: string) {
@@ -32,7 +32,7 @@ it('mostra os erros quando os campos estão vazios', async () => {
 
 it('recusa a senha errada sem dizer qual campo errou', async () => {
   await abrirTela();
-  await entrarCom('cidadao@sentinela.demo', 'Errada123');
+  await entrarCom('cidadao@pluvia.demo', 'Errada123');
   expect(await screen.findByText('E-mail ou senha incorretos.')).toBeTruthy();
   expect(await lerSessao()).toBeNull();
 });
@@ -40,18 +40,18 @@ it('recusa a senha errada sem dizer qual campo errou', async () => {
 it('bloqueia o login depois de 5 senhas erradas seguidas', async () => {
   await abrirTela();
   for (let i = 0; i < 5; i++) {
-    await entrarCom('cidadao@sentinela.demo', 'Errada123');
+    await entrarCom('cidadao@pluvia.demo', 'Errada123');
     await screen.findByText('E-mail ou senha incorretos.');
   }
-  await entrarCom('cidadao@sentinela.demo', 'Cidadao123');
+  await entrarCom('cidadao@pluvia.demo', 'Cidadao123');
   expect(await screen.findByText(/Muitas tentativas/)).toBeTruthy();
   expect(await lerSessao()).toBeNull();
 });
 
-it('preenche a conta de demonstração do agente e entra', async () => {
+it('preenche a conta de demonstração da equipe e entra', async () => {
   await abrirTela();
-  await fireEvent.press(screen.getByRole('button', { name: 'Usar conta de agente' }));
-  expect(screen.getByLabelText('E-mail').props.value).toBe('agente@sentinela.demo');
+  await fireEvent.press(screen.getByRole('button', { name: 'Usar conta da equipe' }));
+  expect(screen.getByLabelText('E-mail').props.value).toBe('agente@pluvia.demo');
   await fireEvent.press(screen.getByRole('button', { name: 'Entrar' }));
   await waitFor(async () => expect(await lerSessao()).not.toBeNull());
 });

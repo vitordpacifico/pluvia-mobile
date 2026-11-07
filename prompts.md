@@ -69,26 +69,43 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Comentários removidos dos 46 arquivos de código, sem alterar nenhuma linha de código. Testes, checagem de tipos e lint sem erros.
 
+### 10. Adaptar o app ao documento de definição (07/11/2026)
+
+**Pedido:** Adaptar completamente o aplicativo ao documento de definição da solução (proposta "Alaga"), que passa a ser a base do projeto, usando o nome e o logotipo Pluvia.
+
+**Resultado:** Aplicativo refeito sobre o MVP recomendado no documento:
+
+- mapa e lista de ocorrências com os cinco estados do documento, filtros e risco estimado por região;
+- tela da ocorrência com fonte, horários, histórico e aviso de encerramento;
+- meu carro e locais favoritos no cofre do sistema, com raio e consulta "Onde estacionar?";
+- relato com foto, limpeza dos metadados da imagem, triagem de IA simulada e moderação pela equipe;
+- avisos de alagamento novo, encerramento e risco elevado, com o tempo até a chegada;
+- simulação de três sensores ESP32, de uma fonte oficial e do servidor dos relatos;
+- novo contrato da API, novo roteiro do vídeo e 156 testes automatizados.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
-- Segundo perfil: **agente da Defesa Civil**. A tarefa cita como exemplo "cidadão e agente ou profissional".
-- O agente não se cadastra pelo app. Duas contas de demonstração são criadas no primeiro uso.
+- Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.
+- A equipe não se cadastra pelo app. Duas contas de demonstração são criadas no primeiro uso, e a cidadã já vem com um carro salvo.
+- Região do protótipo: Cambuci, Ipiranga, Mooca, Vila Prudente e vizinhos, com ocorrências e sensores fictícios em bairros reais.
+- Triagem da foto simulada a partir do tipo do relato, com aviso na tela, até o modelo da disciplina de IA ficar pronto.
+- Risco estimado simulado: sobe para elevado quando o sensor da região mede água.
+- Relato em análise visível só para o autor e para a equipe.
+- "Sem dados recentes" quando uma ocorrência ativa passa de 1 hora sem atualização.
+- Sensor: alagamento a partir de 20 cm em 2 leituras seguidas, e fim abaixo de 8 cm em 2 leituras seguidas.
+- Carro, favoritos, telefone e CEP no cofre do sistema; nome e e-mail no armazenamento comum, porque o e-mail é usado para achar a conta no login.
 - Login local, com hash SHA-256 e sal, porque a API ainda não existe.
-- Cadastro do cidadão com nome, e-mail, celular, CEP, tipo (morador ou comerciante) e senha. Não pede CPF.
 - Notificações locais, com consulta a cada 10 segundos, em vez de notificações enviadas pelo servidor.
-- A regra das duas leituras seguidas também vale quando o risco diminui.
-- Limites de exemplo: 10, 25 e 40 cm.
-- Contrato da API em `docs/API.md`.
-- Telefone e CEP no cofre do sistema; nome e e-mail no armazenamento comum, porque o e-mail é usado para achar a conta no login.
-- Ícone próprio: gota de água em fundo azul.
+- Contrato da API em `docs/API.md`, com os caminhos do documento de definição.
 
 ## Verificações feitas
 
 - Checagem de tipos (`tsc --noEmit`), lint (`expo lint`) e `expo-doctor` sem erros.
-- 134 testes automatizados passando.
-- Teste das telas e dos fluxos principais na versão web do aplicativo.
+- 156 testes automatizados passando.
+- Teste das telas e dos fluxos principais na versão web do aplicativo, com as duas contas.
+- Compilação do aplicativo para Android e iOS.
 
-Ainda falta rodar o aplicativo no celular com o Expo Go. As notificações e a vibração não podem ser testadas no navegador.
+Ainda falta rodar o aplicativo no celular com o Expo Go. O mapa, a câmera, o GPS, as notificações e a vibração não podem ser testados no navegador.
 
 ## Revisão humana
 

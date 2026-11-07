@@ -1,6 +1,6 @@
 export type PerfilUsuario = 'cidadao' | 'agente';
 
-export type TipoCidadao = 'morador' | 'comerciante';
+export type TipoCidadao = 'motorista' | 'entregador' | 'pedestre' | 'morador';
 
 export interface Usuario {
   id: string;
@@ -24,15 +24,23 @@ export function ehCidadao(usuario: Usuario | null): boolean {
 
 export const ROTULO_PERFIL: Record<PerfilUsuario, string> = {
   cidadao: 'Cidadão',
-  agente: 'Agente da Defesa Civil',
+  agente: 'Equipe de monitoramento',
 };
 
 export const ROTULO_TIPO_CIDADAO: Record<TipoCidadao, string> = {
-  morador: 'Morador',
-  comerciante: 'Comerciante',
+  motorista: 'Motorista ou motociclista',
+  entregador: 'Entregador',
+  pedestre: 'Pedestre ou passageiro',
+  morador: 'Morador de área de risco',
 };
 
 export const OPCOES_TIPO_CIDADAO: { valor: TipoCidadao; rotulo: string; descricao: string }[] = [
-  { valor: 'morador', rotulo: 'Morador', descricao: 'Moro perto de um ponto de alagamento' },
-  { valor: 'comerciante', rotulo: 'Comerciante', descricao: 'Tenho comércio perto de um ponto' },
+  { valor: 'motorista', rotulo: 'Motorista ou motociclista', descricao: 'Dirijo e estaciono na rua' },
+  { valor: 'entregador', rotulo: 'Entregador', descricao: 'Circulo pela cidade a trabalho' },
+  { valor: 'pedestre', rotulo: 'Pedestre ou passageiro', descricao: 'Ando a pé ou de transporte' },
+  { valor: 'morador', rotulo: 'Morador de área de risco', descricao: 'Moro perto de um ponto que alaga' },
 ];
+
+export function ehTipoCidadao(valor: unknown): valor is TipoCidadao {
+  return typeof valor === 'string' && valor in ROTULO_TIPO_CIDADAO;
+}

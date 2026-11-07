@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "SENTINELA",
-    "slug": "sentinela-mobile",
+    "name": "Pluvia",
+    "slug": "pluvia-mobile",
     "version": "1.0.0",
-    "scheme": "sentinela",
+    "scheme": "pluvia",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0B4F8A",
+        "backgroundColor": "#0029C7",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -27,7 +27,21 @@
       "expo-status-bar",
       "expo-font",
       "expo-asset",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Pluvia usa sua localização para mostrar alagamentos perto de você e marcar onde o carro está. Você também pode escolher o bairro."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Pluvia usa suas fotos para anexar a um relato de alagamento.",
+          "cameraPermission": "O Pluvia usa a câmera para fotografar um alagamento e enviar o relato.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -5,9 +5,10 @@ import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
 import { CaixaSelecao } from '@/componentes/CaixaSelecao';
 import { CampoTexto } from '@/componentes/CampoTexto';
-import { ExplicacaoNiveis } from '@/componentes/ExplicacaoNiveis';
 import { GrupoOpcoes } from '@/componentes/GrupoOpcoes';
+import { SeloEstado } from '@/componentes/SeloEstado';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
+import { INFO_ESTADO, type EstadoExibido } from '@/dominio/ocorrencia';
 import { OPCOES_TIPO_CIDADAO, type TipoCidadao } from '@/dominio/usuario';
 import { estilosComuns } from '@/estilos/comuns';
 import { pedirPermissaoDeNotificacao } from '@/servicos/alertas/notificacoes';
@@ -36,13 +37,15 @@ const SEM_ERROS = {
   consentimento: null,
 } satisfies Record<string, Validacao>;
 
+const ESTADOS: EstadoExibido[] = ['ATIVO', 'COMUNITARIO', 'ENCERRADO', 'SEM_DADOS'];
+
 export default function TelaCadastro() {
   const { cadastrar } = useAutenticacao();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [cep, setCep] = useState('');
-  const [tipoCidadao, setTipoCidadao] = useState<TipoCidadao>('morador');
+  const [tipoCidadao, setTipoCidadao] = useState<TipoCidadao>('motorista');
   const [senha, setSenha] = useState('');
   const [confirmacao, setConfirmacao] = useState('');
   const [consentimento, setConsentimento] = useState(false);
@@ -58,7 +61,7 @@ export default function TelaCadastro() {
       cep: validarCep(cep),
       senha: validarSenha(senha),
       confirmacao: validarConfirmacaoSenha(senha, confirmacao),
-      consentimento: consentimento ? null : 'É preciso concordar para receber os alertas.',
+      consentimento: consentimento ? null : 'É preciso concordar para receber os avisos.',
     };
     setErros(novosErros);
     setErroGeral(null);
@@ -85,9 +88,14 @@ export default function TelaCadastro() {
       <ScrollView contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
         <View style={estilosComuns.cartao}>
           <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-            Os quatro níveis de risco
+            O que o mapa mostra
           </Text>
-          <ExplicacaoNiveis />
+          {ESTADOS.map((estado) => (
+            <View key={estado} style={estilos.estado}>
+              <SeloEstado estado={estado} />
+              <Text style={estilosComuns.legenda}>{INFO_ESTADO[estado].explicacao}</Text>
+            </View>
+          ))}
         </View>
 
         <View style={[estilosComuns.cartao, estilos.formulario]}>
@@ -126,7 +134,7 @@ export default function TelaCadastro() {
           />
           <CampoTexto
             rotulo="CEP"
-            dica="Usado para indicar os pontos perto de você."
+            dica="Fica criptografado no cofre deste celular."
             valor={cep}
             onMudar={setCep}
             mascara={mascararCep}
@@ -159,7 +167,7 @@ export default function TelaCadastro() {
             autoComplete="new-password"
           />
           <CaixaSelecao
-            texto="Concordo que meus dados fiquem salvos neste celular para receber alertas de alagamento."
+            texto="Concordo que meus dados fiquem salvos neste celular para receber avisos de alagamento."
             marcada={consentimento}
             onMudar={setConsentimento}
             erro={erros.consentimento}
@@ -167,7 +175,7 @@ export default function TelaCadastro() {
           {erroGeral && <Aviso tipo="erro" texto={erroGeral} />}
           <Botao rotulo="Criar conta" icone="check-circle" ocupado={enviando} onPress={enviar} />
           <Text style={estilosComuns.legenda}>
-            Ao criar a conta, vamos pedir permissão para enviar notificações de alerta.
+            Ao criar a conta, vamos pedir permissão para enviar notificações. Localização e câmera só são pedidas quando você usar.
           </Text>
         </View>
       </ScrollView>

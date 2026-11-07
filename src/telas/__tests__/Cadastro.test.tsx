@@ -54,7 +54,7 @@ it('mostra um erro em cada campo inválido', async () => {
   expect(screen.getByText('O CEP tem 8 números.')).toBeTruthy();
   expect(screen.getByText('A senha precisa ter pelo menos 8 caracteres.')).toBeTruthy();
   expect(screen.getByText('Repita a senha.')).toBeTruthy();
-  expect(screen.getByText('É preciso concordar para receber os alertas.')).toBeTruthy();
+  expect(screen.getByText('É preciso concordar para receber os avisos.')).toBeTruthy();
   expect(await lerSessao()).toBeNull();
 });
 
@@ -73,8 +73,8 @@ it('cria a conta e já deixa a pessoa logada', async () => {
 
 it('avisa quando o e-mail já está cadastrado', async () => {
   await abrirTela();
-  await waitFor(async () => expect(await AsyncStorage.getItem('@sentinela:contas')).not.toBeNull());
-  await preencher({ ...VALIDOS, 'E-mail': 'cidadao@sentinela.demo' });
+  await waitFor(async () => expect(await AsyncStorage.getItem('@pluvia:contas')).not.toBeNull());
+  await preencher({ ...VALIDOS, 'E-mail': 'cidadao@pluvia.demo' });
   await fireEvent.press(screen.getByRole('checkbox'));
   await fireEvent.press(screen.getByRole('button', { name: 'Criar conta' }));
   expect(await screen.findByText('Este e-mail já está cadastrado.')).toBeTruthy();

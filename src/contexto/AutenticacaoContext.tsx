@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import type { Usuario } from '@/dominio/usuario';
+import { fonteDeDados } from '@/servicos/dados/fonte';
 import { encerrarSessao, iniciarSessao, lerSessao } from '@/servicos/armazenamento/sessaoServico';
 import {
   atualizarCidadao,
@@ -99,6 +100,7 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
         throw new ErroLogin('Só contas de cidadão podem ser excluídas pelo app.');
       }
       if (!(await autenticar(usuario.email, senha))) throw new ErroLogin('Senha incorreta.');
+      await fonteDeDados.excluirRelatosDoAutor(usuario.id);
       await excluirContaSalva(usuario.id);
       await encerrarSessao();
       setUsuario(null);

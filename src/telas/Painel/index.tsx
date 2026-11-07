@@ -1,149 +1,152 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 
 import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
-import { SeloRisco } from '@/componentes/SeloRisco';
+import { CartaoOcorrencia } from '@/componentes/CartaoOcorrencia';
+import { GraficoNivel } from '@/componentes/GraficoNivel';
 import { useDados } from '@/contexto/DadosContext';
-import {
-  contarPorNivel,
-  dadosDesatualizados,
-  EXPLICACAO_REGRA_DE_CONFIRMACAO,
-  gravidade,
-  INFO_RISCO,
-  ORDEM_RISCO,
-} from '@/dominio/risco';
+import { estadoExibido, INFO_ESTADO, type EstadoExibido } from '@/dominio/ocorrencia';
+import { EXPLICACAO_CONFIRMACAO_SENSOR, LIMIAR_ALAGAMENTO_CM } from '@/dominio/sensor';
 import { estilosComuns } from '@/estilos/comuns';
-import { PONTOS_SIMULADOS, reiniciarSimulacao, simularChuvaForte } from '@/servicos/dados/simulacao';
-import { formatarCm, formatarDataHora } from '@/utilitarios/formato';
+import { fonteDeDados } from '@/servicos/dados/fonte';
+import { reiniciarSimulacao } from '@/servicos/dados/simulacao';
+import { formatarCm, formatarHaQuanto } from '@/utilitarios/formato';
 
 import { estilos } from './estilos';
 
+const MINUTOS_SENSOR_SEM_SINAL = 5;
+const CONTADORES: EstadoExibido[] = ['ATIVO', 'COMUNITARIO', 'SEM_DADOS', 'ENCERRADO'];
+
 export default function TelaPainel() {
-  const { pontos, simulada, recarregar, erro } = useDados();
+  const { ocorrencias, sensores, simulada, recarregar, erro, obtidosEm } = useDados();
   const [mensagem, setMensagem] = useState<string | null>(null);
+  const [emAnalise, setEmAnalise] = useState(0);
 
-  const contagem = contarPorNivel(pontos);
-  const emRisco = pontos
-    .filter((p) => p.risco !== 'NORMAL')
-    .sort((a, b) => gravidade(b.risco) - gravidade(a.risco));
-  const semSinal = pontos.filter((p) => dadosDesatualizados(p));
+  useFocusEffect(
+    useCallback(() => {
+      fonteDeDados
+        .listarRelatos({ status: 'EM_ANALISE' })
+        .then((lista) => setEmAnalise(lista.length))
+        .catch(() => undefined);
+    }, []),
+  );
 
-  function abrir(id: string) {
-    router.push({ pathname: '/ponto/[id]', params: { id } });
-  }
+  const agora = obtidosEm?.getTime() ?? 0;
+  const contagem = CONTADORES.map((estado) => ({
+    estado,
+    quantidade: ocorrencias.filter((o) => estadoExibido(o, agora) === estado).length,
+  }));
+  const ativas = ocorrencias
+    .filter((o) => o.status === 'ATIVO')
+    .sort((a, b) => Date.parse(b.registradaEm) - Date.parse(a.registradaEm));
+  const sensorSemSinal = (atualizadoEm: string) =>
+    agora - Date.parse(atualizadoEm) > MINUTOS_SENSOR_SEM_SINAL * 60_000;
 
-  async function chuva(pontoId: string, nome: string) {
-    simularChuvaForte(pontoId);
-    setMensagem(`Chuva forte simulada em ${nome}. A água começa a subir em cerca de 30 segundos.`);
-    await recarregar();
+  async function chuva(sensorId: string, nome: string) {
+    try {
+      await fonteDeDados.simularChuva(sensorId);
+      setMensagem(`Chuva forte simulada no ${nome}. A água passa de ${LIMIAR_ALAGAMENTO_CM} cm em cerca de 1 minuto.`);
+      await recarregar();
+    } catch (e) {
+      setMensagem(e instanceof Error ? e.message : 'Não foi possível simular a chuva.');
+    }
   }
 
   function reiniciar() {
-    Alert.alert('Reiniciar simulação', 'Todas as chuvas simuladas param e recomeçam do zero.', [
+    Alert.alert('Reiniciar a demonstração?', 'As chuvas e os encerramentos simulados voltam ao início.', [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Reiniciar',
         style: 'destructive',
-        onPress: async () => {
+        onPress: () => {
           reiniciarSimulacao();
-          setMensagem('Simulação reiniciada.');
-          await recarregar();
+          setMensagem('Demonstração reiniciada.');
+          recarregar();
         },
       },
     ]);
   }
 
   return (
-    <ScrollView contentContainerStyle={estilosComuns.conteudo}>
+    <ScrollView style={estilosComuns.tela} contentContainerStyle={estilosComuns.conteudo}>
       <Text style={estilosComuns.titulo} accessibilityRole="header">
-        Painel da Defesa Civil
+        Painel da equipe
       </Text>
-      {erro && <Aviso tipo="erro" texto={`Sem conexão com o servidor. ${erro}`} />}
+      {erro && <Aviso tipo="erro" texto={`Sem atualização suficiente: ${erro}`} />}
+      {mensagem && <Aviso tipo="sucesso" texto={mensagem} />}
 
-      <View style={estilosComuns.cartao}>
-        <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-          Pontos por nível
-        </Text>
-        <View style={estilos.grade}>
-          {ORDEM_RISCO.map((risco) => {
-            const info = INFO_RISCO[risco];
-            return (
-              <View
-                key={risco}
-                style={[estilos.contador, { backgroundColor: info.corFundo }]}
-                accessible
-                accessibilityLabel={`${contagem[risco]} pontos em ${info.rotulo}`}
-              >
-                <Text style={[estilos.numero, { color: info.corTexto }]}>{contagem[risco]}</Text>
-                <SeloRisco risco={risco} />
-              </View>
-            );
-          })}
-        </View>
-      </View>
-
-      <View style={estilosComuns.cartao}>
-        <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-          Pontos que exigem atenção
-        </Text>
-        <Text style={estilosComuns.legenda}>{EXPLICACAO_REGRA_DE_CONFIRMACAO}</Text>
-        {emRisco.length === 0 ? (
-          <Text style={estilosComuns.legenda}>Nenhum ponto acima do nível normal.</Text>
-        ) : (
-          emRisco.map((ponto) => (
-            <View key={ponto.id} style={estilos.item}>
-              <SeloRisco risco={ponto.risco} />
-              <Text style={estilos.textoItem}>
-                {ponto.nome}: {formatarCm(ponto.nivelAtualCm)}
-              </Text>
-              <Botao rotulo="Abrir" variante="link" onPress={() => abrir(ponto.id)} />
+      <View style={estilos.grade}>
+        {contagem.map(({ estado, quantidade }) => {
+          const info = INFO_ESTADO[estado];
+          return (
+            <View
+              key={estado}
+              style={[estilos.contador, { backgroundColor: info.corFundo }]}
+              accessible
+              accessibilityLabel={`${quantidade} ocorrência(s): ${info.rotulo}`}
+            >
+              <Text style={[estilos.numero, { color: info.corTexto }]}>{quantidade}</Text>
+              <Text style={[estilos.rotuloContador, { color: info.corTexto }]}>{info.rotulo}</Text>
             </View>
-          ))
-        )}
+          );
+        })}
       </View>
 
       <View style={estilosComuns.cartao}>
-        <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-          Sensores sem sinal
-        </Text>
-        {semSinal.length === 0 ? (
-          <Text style={estilosComuns.legenda}>Todos os sensores enviaram leituras recentes.</Text>
-        ) : (
-          semSinal.map((ponto) => (
-            <Aviso
-              key={ponto.id}
-              tipo="aviso"
-              texto={`${ponto.nome}: última leitura em ${formatarDataHora(ponto.atualizadoEm)}. Verifique o dispositivo.`}
-            />
-          ))
-        )}
+        <Text style={estilosComuns.tituloSecao}>Relatos em análise: {emAnalise}</Text>
+        <Botao rotulo="Abrir a moderação" icone="account-check" variante="secundario" onPress={() => router.navigate('/moderacao')} />
       </View>
+
+      <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
+        Sensores de nível (ESP32)
+      </Text>
+      <Text style={estilos.detalhe}>{EXPLICACAO_CONFIRMACAO_SENSOR}</Text>
+      {sensores.map((sensor) => {
+        const semSinal = sensorSemSinal(sensor.atualizadoEm);
+        return (
+          <View key={sensor.id} style={estilosComuns.cartao}>
+            <Text style={estilos.nome}>{sensor.nome}</Text>
+            <Text style={estilos.detalhe}>
+              {sensor.referencia} · {sensor.bairro}
+            </Text>
+            {semSinal ? (
+              <Aviso
+                tipo="aviso"
+                texto={`Sem leituras ${formatarHaQuanto(sensor.atualizadoEm)}. Falta de dados não é sinal de segurança.`}
+              />
+            ) : (
+              <>
+                <Text style={estilos.nivel}>Água: {formatarCm(sensor.nivelCm)}</Text>
+                <GraficoNivel leituras={sensor.leituras} />
+                {simulada && (
+                  <Botao
+                    rotulo={`Simular chuva no ${sensor.nome}`}
+                    icone="weather-pouring"
+                    variante="secundario"
+                    onPress={() => chuva(sensor.id, sensor.nome)}
+                  />
+                )}
+              </>
+            )}
+          </View>
+        );
+      })}
+
+      <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
+        Ocorrências ativas ({ativas.length})
+      </Text>
+      {ativas.map((ocorrencia) => (
+        <CartaoOcorrencia
+          key={ocorrencia.id}
+          ocorrencia={ocorrencia}
+          onPress={() => router.push({ pathname: '/ocorrencia/[id]', params: { id: ocorrencia.id } })}
+        />
+      ))}
 
       {simulada && (
-        <View style={estilosComuns.cartao}>
-          <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-            Simulação IoT
-          </Text>
-          <Text style={estilosComuns.legenda}>
-            Imita o sensor de um ponto registrando uma chuva forte. Use para demonstrar os alertas
-            enquanto o ESP32 não está ligado ao app.
-          </Text>
-          {mensagem && <Aviso tipo="sucesso" texto={mensagem} />}
-          <View style={estilos.acaoSimulacao}>
-            {PONTOS_SIMULADOS.filter((p) => !p.semSinalHaMs).map((ponto) => (
-              <Botao
-                key={ponto.id}
-                rotulo={`Simular chuva em ${ponto.nome}`}
-                icone="weather-pouring"
-                variante="secundario"
-                onPress={() => chuva(ponto.id, ponto.nome)}
-              />
-            ))}
-            <Botao rotulo="Reiniciar simulação" icone="refresh" variante="perigo" onPress={reiniciar} />
-          </View>
-        </View>
+        <Botao rotulo="Reiniciar a demonstração" icone="restart" variante="link" onPress={reiniciar} />
       )}
     </ScrollView>
   );

@@ -10,8 +10,10 @@ import {
 } from 'react';
 import { AppState } from 'react-native';
 
-import type { PontoMonitorado } from '@/dominio/tipos';
-import { lerCopiaPontos, salvarCopiaPontos } from '@/servicos/armazenamento/cacheServico';
+import type { Ocorrencia } from '@/dominio/ocorrencia';
+import type { RiscoEstimado } from '@/dominio/riscoEstimado';
+import type { SensorNivel } from '@/dominio/tipos';
+import { lerCopiaMapa, salvarCopiaMapa } from '@/servicos/armazenamento/cacheServico';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 
 export const INTERVALO_ATUALIZACAO_MS = 10_000;
@@ -19,7 +21,9 @@ export const INTERVALO_ATUALIZACAO_MS = 10_000;
 export type OrigemDados = 'rede' | 'copia-local';
 
 interface EstadoDados {
-  pontos: PontoMonitorado[];
+  ocorrencias: Ocorrencia[];
+  riscos: RiscoEstimado[];
+  sensores: SensorNivel[];
   carregando: boolean;
   erro: string | null;
   origem: OrigemDados | null;
@@ -36,7 +40,9 @@ function mensagemDeErro(erro: unknown): string {
 }
 
 export function DadosProvider({ children }: { children: ReactNode }) {
-  const [pontos, setPontos] = useState<PontoMonitorado[]>([]);
+  const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
+  const [riscos, setRiscos] = useState<RiscoEstimado[]>([]);
+  const [sensores, setSensores] = useState<SensorNivel[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [origem, setOrigem] = useState<OrigemDados | null>(null);
@@ -47,18 +53,25 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   const recarregar = useCallback((): Promise<void> => {
     if (emAndamento.current) return Promise.resolve();
     emAndamento.current = true;
-    return fonteDeDados
-      .listarPontos()
-      .then((lista) => {
+    return Promise.all([
+      fonteDeDados.listarOcorrencias(),
+      fonteDeDados.listarRiscos(),
+      fonteDeDados.listarSensores(),
+    ])
+      .then(([novasOcorrencias, novosRiscos, novosSensores]) => {
         const agora = new Date();
         recebeuDaRede.current = true;
-        setPontos(lista);
+        setOcorrencias(novasOcorrencias);
+        setRiscos(novosRiscos);
+        setSensores(novosSensores);
         setOrigem('rede');
         setObtidosEm(agora);
         setErro(null);
-        salvarCopiaPontos(lista, agora).catch((e) =>
-          console.warn('Falha ao salvar a cópia local dos pontos', e),
-        );
+        salvarCopiaMapa({
+          ocorrencias: novasOcorrencias,
+          riscos: novosRiscos,
+          salvoEm: agora.toISOString(),
+        }).catch((e) => console.warn('Falha ao salvar a cópia local do mapa', e));
       })
       .catch((e: unknown) => setErro(mensagemDeErro(e)))
       .finally(() => {
@@ -68,15 +81,16 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    lerCopiaPontos()
+    lerCopiaMapa()
       .then((copia) => {
         if (!copia || recebeuDaRede.current) return;
-        setPontos(copia.pontos);
+        setOcorrencias(copia.ocorrencias);
+        setRiscos(copia.riscos);
         setOrigem('copia-local');
-        setObtidosEm(copia.salvoEm);
+        setObtidosEm(new Date(copia.salvoEm));
         setCarregando(false);
       })
-      .catch((e) => console.warn('Falha ao ler a cópia local dos pontos', e));
+      .catch((e) => console.warn('Falha ao ler a cópia local do mapa', e));
   }, []);
 
   useEffect(() => {
@@ -95,7 +109,9 @@ export function DadosProvider({ children }: { children: ReactNode }) {
 
   const valor = useMemo(
     () => ({
-      pontos,
+      ocorrencias,
+      riscos,
+      sensores,
       carregando,
       erro,
       origem,
@@ -103,7 +119,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       simulada: fonteDeDados.simulada,
       recarregar,
     }),
-    [pontos, carregando, erro, origem, obtidosEm, recarregar],
+    [ocorrencias, riscos, sensores, carregando, erro, origem, obtidosEm, recarregar],
   );
 
   return <DadosContext.Provider value={valor}>{children}</DadosContext.Provider>;

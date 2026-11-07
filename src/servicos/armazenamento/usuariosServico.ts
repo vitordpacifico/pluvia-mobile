@@ -1,10 +1,12 @@
 import * as Crypto from 'expo-crypto';
 
-import type { TipoCidadao, Usuario } from '@/dominio/usuario';
+import { ehTipoCidadao, type TipoCidadao, type Usuario } from '@/dominio/usuario';
 import { calcularHashSenha, gerarSal, senhaConfere } from '@/servicos/seguranca/senha';
 
-import { atualizarLista, CHAVES, lerLista, remover } from './armazenamento';
+import { atualizarLista, CHAVES, lerLista } from './armazenamento';
+import { apagarDadosDeAvisos } from './avisosServico';
 import { apagarProtegido, guardarProtegido, lerProtegido, type DadosProtegidos } from './cofre';
+import { apagarLocais, salvarCarro } from './locaisServico';
 
 interface ContaSalva extends Omit<Usuario, keyof DadosProtegidos> {
   sal: string;
@@ -34,21 +36,29 @@ export class ErroCadastro extends Error {}
 export const CONTAS_DEMONSTRACAO = [
   {
     nome: 'Cidadã de demonstração',
-    email: 'cidadao@sentinela.demo',
+    email: 'cidadao@pluvia.demo',
     senha: 'Cidadao123',
     perfil: 'cidadao',
     telefone: '(11) 91234-5678',
     cep: '01001-000',
-    tipoCidadao: 'comerciante',
+    tipoCidadao: 'motorista',
   },
   {
     nome: 'Agente de demonstração',
-    email: 'agente@sentinela.demo',
+    email: 'agente@pluvia.demo',
     senha: 'Agente123',
     perfil: 'agente',
-    orgao: 'Defesa Civil (demonstração)',
+    orgao: 'Equipe Pluvia (demonstração)',
   },
 ] as const;
+
+export const CARRO_DEMONSTRACAO = {
+  nome: 'Meu carro',
+  bairro: 'Cambuci',
+  referencia: 'Perto do sensor de demonstração 1',
+  local: { latitude: -23.5679, longitude: -46.6178 },
+  raioM: 500,
+} as const;
 
 export function normalizarEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -57,7 +67,8 @@ export function normalizarEmail(email: string): string {
 async function paraUsuario(conta: ContaSalva): Promise<Usuario> {
   const { sal: _sal, senhaHash: _hash, ...usuario } = conta;
   if (usuario.perfil !== 'cidadao') return usuario;
-  return { ...usuario, ...(await lerProtegido(conta.id)) };
+  const tipoCidadao = ehTipoCidadao(usuario.tipoCidadao) ? usuario.tipoCidadao : 'morador';
+  return { ...usuario, tipoCidadao, ...(await lerProtegido(conta.id)) };
 }
 
 function separarProtegidos<T extends DadosProtegidos>(dados: T): [Omit<T, keyof DadosProtegidos>, DadosProtegidos] {
@@ -108,6 +119,8 @@ export async function garantirContasDemonstracao(): Promise<void> {
     faltando.map(({ senha, ...dados }) => montarConta({ ...dados }, senha)),
   );
   await atualizarLista<ContaSalva>(CHAVES.contas, (contas) => [...contas, ...novas]);
+  const cidada = novas.find((conta) => conta.perfil === 'cidadao');
+  if (cidada) await salvarCarro(cidada.id, { ...CARRO_DEMONSTRACAO, local: { ...CARRO_DEMONSTRACAO.local } });
 }
 
 export async function cadastrarCidadao(dados: DadosCadastroCidadao): Promise<Usuario> {
@@ -165,9 +178,5 @@ export async function atualizarCidadao(
 
 export async function excluirConta(id: string): Promise<void> {
   await atualizarLista<ContaSalva>(CHAVES.contas, (contas) => contas.filter((c) => c.id !== id));
-  await Promise.all([
-    apagarProtegido(id),
-    remover(CHAVES.pontosSeguidos(id)),
-    remover(CHAVES.alertas(id)),
-  ]);
+  await Promise.all([apagarProtegido(id), apagarLocais(id), apagarDadosDeAvisos(id)]);
 }

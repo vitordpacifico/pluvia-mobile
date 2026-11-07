@@ -1,17 +1,30 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router/js-tabs';
+import type { ComponentProps } from 'react';
 
-import { useAlertas } from '@/contexto/AlertasContext';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
+import { useAvisos } from '@/contexto/AvisosContext';
 import { ehAgente, ehCidadao } from '@/dominio/usuario';
 import { cores } from '@/estilos/tema';
 
+type NomeIcone = ComponentProps<typeof MaterialCommunityIcons>['name'];
+
+function icone(nome: NomeIcone) {
+  return function Icone({ focused, size }: { focused: boolean; size: number }) {
+    return (
+      <MaterialCommunityIcons
+        name={nome}
+        color={focused ? cores.primaria : cores.textoSecundario}
+        size={size}
+      />
+    );
+  };
+}
+
 export default function LayoutAbas() {
   const { usuario } = useAutenticacao();
-  const { pendentes } = useAlertas();
-  const descricaoAlertas =
-    pendentes > 0 ? `Alertas recebidos, ${pendentes} sem confirmação` : 'Alertas recebidos';
-  const corIcone = (focado: boolean) => (focado ? cores.primaria : cores.textoSecundario);
+  const { naoLidos } = useAvisos();
+  const descricaoAvisos = naoLidos > 0 ? `Avisos, ${naoLidos} não lidos` : 'Avisos';
 
   return (
     <Tabs
@@ -19,6 +32,7 @@ export default function LayoutAbas() {
         headerStyle: { backgroundColor: cores.primaria },
         headerTintColor: cores.textoSobrePrimaria,
         headerTitleStyle: { fontWeight: '700' },
+        headerTitle: 'Pluvia',
         tabBarActiveTintColor: cores.primaria,
         tabBarInactiveTintColor: cores.textoSecundario,
         tabBarLabelStyle: { fontWeight: '600' },
@@ -28,37 +42,50 @@ export default function LayoutAbas() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Pontos',
-          headerTitle: 'SENTINELA',
-          tabBarAccessibilityLabel: 'Pontos monitorados',
-          tabBarIcon: ({ focused, size }) => (
-            <MaterialCommunityIcons name="water" color={corIcone(focused)} size={size} />
-          ),
+          title: 'Mapa',
+          tabBarAccessibilityLabel: 'Mapa de alagamentos',
+          tabBarIcon: icone('map-marker-radius'),
         }}
       />
       <Tabs.Protected guard={ehCidadao(usuario)}>
         <Tabs.Screen
-          name="alertas"
+          name="carro"
+          options={{ title: 'Meu carro', tabBarAccessibilityLabel: 'Meu carro', tabBarIcon: icone('car') }}
+        />
+        <Tabs.Screen
+          name="relatar"
           options={{
-            title: 'Alertas',
-            tabBarAccessibilityLabel: descricaoAlertas,
-            tabBarBadge: pendentes > 0 ? pendentes : undefined,
+            title: 'Relatar',
+            tabBarAccessibilityLabel: 'Enviar relato com foto',
+            tabBarIcon: icone('camera'),
+          }}
+        />
+        <Tabs.Screen
+          name="avisos"
+          options={{
+            title: 'Avisos',
+            tabBarAccessibilityLabel: descricaoAvisos,
+            tabBarBadge: naoLidos > 0 ? naoLidos : undefined,
             tabBarBadgeStyle: { backgroundColor: cores.perigo, color: cores.textoSobrePrimaria },
-            tabBarIcon: ({ focused, size }) => (
-              <MaterialCommunityIcons name="bell" color={corIcone(focused)} size={size} />
-            ),
+            tabBarIcon: icone('bell'),
           }}
         />
       </Tabs.Protected>
       <Tabs.Protected guard={ehAgente(usuario)}>
         <Tabs.Screen
+          name="moderacao"
+          options={{
+            title: 'Moderação',
+            tabBarAccessibilityLabel: 'Moderação de relatos',
+            tabBarIcon: icone('account-check'),
+          }}
+        />
+        <Tabs.Screen
           name="painel"
           options={{
             title: 'Painel',
-            tabBarAccessibilityLabel: 'Painel da Defesa Civil',
-            tabBarIcon: ({ focused, size }) => (
-              <MaterialCommunityIcons name="view-dashboard" color={corIcone(focused)} size={size} />
-            ),
+            tabBarAccessibilityLabel: 'Painel da equipe',
+            tabBarIcon: icone('view-dashboard'),
           }}
         />
       </Tabs.Protected>
@@ -67,9 +94,7 @@ export default function LayoutAbas() {
         options={{
           title: 'Perfil',
           tabBarAccessibilityLabel: 'Perfil e configurações',
-          tabBarIcon: ({ focused, size }) => (
-            <MaterialCommunityIcons name="account-circle" color={corIcone(focused)} size={size} />
-          ),
+          tabBarIcon: icone('account-circle'),
         }}
       />
     </Tabs>

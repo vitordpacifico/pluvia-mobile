@@ -1,16 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-const PREFIXO = '@sentinela';
+const PREFIXO = '@pluvia';
 
 export const CHAVES = {
   contas: `${PREFIXO}:contas`,
   sessao: `${PREFIXO}:sessao`,
-  cachePontos: `${PREFIXO}:cache-pontos`,
-  limitesSimulacao: `${PREFIXO}:simulacao:limites`,
-  chuvasSimulacao: `${PREFIXO}:simulacao:chuvas`,
-  pontosSeguidos: (usuarioId: string) => `${PREFIXO}:usuario:${usuarioId}:pontos-seguidos`,
-  alertas: (usuarioId: string) => `${PREFIXO}:usuario:${usuarioId}:alertas`,
+  cacheMapa: `${PREFIXO}:cache-mapa`,
+  simulacao: `${PREFIXO}:simulacao`,
+  relatosSimulados: `${PREFIXO}:simulacao:relatos`,
+  preferencias: (usuarioId: string) => `${PREFIXO}:usuario:${usuarioId}:preferencias`,
+  avisos: (usuarioId: string) => `${PREFIXO}:usuario:${usuarioId}:avisos`,
+  estadoAvisos: (usuarioId: string) => `${PREFIXO}:usuario:${usuarioId}:estado-avisos`,
 } as const;
 
 export async function lerJSON<T>(chave: string, padrao: T): Promise<T> {

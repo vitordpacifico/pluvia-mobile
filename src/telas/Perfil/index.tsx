@@ -1,4 +1,4 @@
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
@@ -7,7 +7,7 @@ import { Botao } from '@/componentes/Botao';
 import { CampoTexto } from '@/componentes/CampoTexto';
 import { GrupoOpcoes } from '@/componentes/GrupoOpcoes';
 import { ErroLogin, useAutenticacao } from '@/contexto/AutenticacaoContext';
-import type { PontoSeguido } from '@/dominio/tipos';
+import { useLocais } from '@/contexto/LocaisContext';
 import {
   ehCidadao,
   OPCOES_TIPO_CIDADAO,
@@ -17,10 +17,6 @@ import {
 } from '@/dominio/usuario';
 import { estilosComuns } from '@/estilos/comuns';
 import { notificacoesPermitidas, pedirPermissaoDeNotificacao } from '@/servicos/alertas/notificacoes';
-import {
-  deixarDeSeguir,
-  listarPontosSeguidos,
-} from '@/servicos/armazenamento/pontosSeguidosServico';
 import { mascararCep, mascararTelefone } from '@/utilitarios/mascaras';
 import {
   semErros,
@@ -145,7 +141,7 @@ function ExcluirConta() {
         Excluir conta
       </Text>
       <Text style={estilosComuns.legenda}>
-        Apaga sua conta, os pontos que você acompanha e seus alertas deste celular. Não dá para
+        Apaga sua conta, o local do carro, os locais favoritos, os avisos e os seus relatos. Não dá para
         desfazer.
       </Text>
       {aberto ? (
@@ -182,7 +178,7 @@ function ExcluirConta() {
 
 export default function TelaPerfil() {
   const { usuario, sair } = useAutenticacao();
-  const [seguidos, setSeguidos] = useState<PontoSeguido[]>([]);
+  const { locais } = useLocais();
   const [permitidas, setPermitidas] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const cidadao = ehCidadao(usuario);
@@ -190,11 +186,10 @@ export default function TelaPerfil() {
   const carregar = useCallback(async () => {
     try {
       setPermitidas(await notificacoesPermitidas().catch(() => false));
-      if (usuario && cidadao) setSeguidos(await listarPontosSeguidos(usuario.id));
     } catch {
       setErro('Não foi possível carregar suas preferências.');
     }
-  }, [usuario, cidadao]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -202,17 +197,8 @@ export default function TelaPerfil() {
     }, [carregar]),
   );
 
-  const remover = useCallback(
-    async (ponto: PontoSeguido) => {
-      if (!usuario) return;
-      await deixarDeSeguir(usuario.id, ponto.pontoId).catch(() => setErro('Não foi possível remover.'));
-      await carregar();
-    },
-    [usuario, carregar],
-  );
-
   const confirmarSaida = useCallback(() => {
-    Alert.alert('Sair da conta', 'Você deixará de receber alertas neste celular até entrar de novo.', [
+    Alert.alert('Sair da conta', 'Você deixará de receber avisos neste celular até entrar de novo.', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Sair', style: 'destructive', onPress: () => sair() },
     ]);
@@ -250,7 +236,7 @@ export default function TelaPerfil() {
               <>
                 <Aviso
                   tipo="aviso"
-                  texto="Notificações desativadas. Você só verá os alertas na aba Alertas, com o app aberto."
+                  texto="Notificações desativadas. Você só verá os avisos na aba Avisos, com o app aberto."
                 />
                 <Botao
                   rotulo="Ativar notificações"
@@ -267,24 +253,19 @@ export default function TelaPerfil() {
         {cidadao && (
           <View style={estilosComuns.cartao}>
             <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-              Pontos que você acompanha
+              Áreas monitoradas
             </Text>
-            {seguidos.length === 0 ? (
-              <Text style={estilosComuns.legenda}>Nenhum. Ative os alertas na tela de um ponto.</Text>
-            ) : (
-              seguidos.map((ponto) => (
-                <View key={ponto.pontoId} style={estilos.seguido}>
-                  <Text style={estilos.nomeSeguido}>{ponto.pontoNome}</Text>
-                  <Botao
-                    rotulo="Remover"
-                    icone="bell-off"
-                    variante="secundario"
-                    dica={`Para de receber alertas de ${ponto.pontoNome}`}
-                    onPress={() => remover(ponto)}
-                  />
-                </View>
-              ))
-            )}
+            <Text style={estilosComuns.legenda}>
+              {locais.length === 0
+                ? 'Nenhum local salvo.'
+                : `${locais.length} local(is): ${locais.map((l) => l.nome).join(', ')}.`}
+            </Text>
+            <Botao
+              rotulo="Gerenciar áreas e avisos"
+              icone="tune"
+              variante="secundario"
+              onPress={() => router.push('/areas')}
+            />
           </View>
         )}
 
@@ -293,7 +274,7 @@ export default function TelaPerfil() {
         {cidadao && <ExcluirConta />}
 
         <Text style={estilosComuns.rodape}>
-          O SENTINELA não substitui as orientações oficiais da Defesa Civil.
+          O Pluvia não substitui os comunicados oficiais. Em emergência, ligue 199 (Defesa Civil) ou 193 (Bombeiros).
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>

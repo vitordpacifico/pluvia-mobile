@@ -3,8 +3,8 @@ import { somenteDigitos } from './mascaras';
 export type Validacao = string | null;
 
 export const SENHA_TAMANHO_MINIMO = 8;
-export const LIMITE_MINIMO_CM = 1;
-export const LIMITE_MAXIMO_CM = 300;
+export const HORAS_MAXIMAS_RELATO = 6;
+export const TAMANHO_MAXIMO_DESCRICAO = 200;
 
 export function validarNome(nome: string): Validacao {
   const limpo = nome.trim();
@@ -58,34 +58,51 @@ export function validarObrigatorio(valor: string, mensagem: string): Validacao {
   return valor.trim() ? null : mensagem;
 }
 
-interface LimitesDigitados {
-  atencaoCm: number | null;
-  alertaCm: number | null;
-  evacuacaoCm: number | null;
+export function horaParaData(hora: string, agora: Date): Date | null {
+  const encontrado = /^(\d{2}):(\d{2})$/.exec(hora);
+  if (!encontrado) return null;
+  const horas = Number(encontrado[1]);
+  const minutos = Number(encontrado[2]);
+  if (horas > 23 || minutos > 59) return null;
+  const data = new Date(agora);
+  data.setHours(horas, minutos, 0, 0);
+  if (data.getTime() > agora.getTime() + 60_000) data.setDate(data.getDate() - 1);
+  return data;
 }
 
-function validarLimite(valor: number | null): Validacao {
-  if (valor === null) return 'Informe um valor.';
-  if (valor < LIMITE_MINIMO_CM || valor > LIMITE_MAXIMO_CM) {
-    return `Use um valor entre ${LIMITE_MINIMO_CM} e ${LIMITE_MAXIMO_CM} cm.`;
+export function validarHoraDoRelato(hora: string, agora: Date): Validacao {
+  if (!hora) return 'Informe a hora em que viu.';
+  const data = horaParaData(hora, agora);
+  if (!data) return 'Hora inválida. Use o formato 14:30.';
+  if (agora.getTime() - data.getTime() > HORAS_MAXIMAS_RELATO * 3_600_000) {
+    return `Só é possível relatar o que aconteceu nas últimas ${HORAS_MAXIMAS_RELATO} horas.`;
   }
   return null;
 }
 
-export function validarLimites(limites: LimitesDigitados): Record<keyof LimitesDigitados, Validacao> {
-  const erros = {
-    atencaoCm: validarLimite(limites.atencaoCm),
-    alertaCm: validarLimite(limites.alertaCm),
-    evacuacaoCm: validarLimite(limites.evacuacaoCm),
-  };
-  const { atencaoCm, alertaCm, evacuacaoCm } = limites;
-  if (!erros.alertaCm && atencaoCm !== null && alertaCm !== null && alertaCm <= atencaoCm) {
-    erros.alertaCm = 'Precisa ser maior que o limite de Atenção.';
+export function validarReferencia(referencia: string): Validacao {
+  const limpo = referencia.trim();
+  if (!limpo) return 'Informe a rua ou um ponto de referência.';
+  if (limpo.length < 3) return 'Escreva pelo menos 3 letras.';
+  if (limpo.length > 80) return 'Use no máximo 80 caracteres.';
+  return null;
+}
+
+export function validarDescricao(descricao: string, obrigatoria: boolean): Validacao {
+  const limpo = descricao.trim();
+  if (obrigatoria && !limpo) return 'Descreva o que você viu.';
+  if (limpo.length > TAMANHO_MAXIMO_DESCRICAO) {
+    return `Use no máximo ${TAMANHO_MAXIMO_DESCRICAO} caracteres.`;
   }
-  if (!erros.evacuacaoCm && alertaCm !== null && evacuacaoCm !== null && evacuacaoCm <= alertaCm) {
-    erros.evacuacaoCm = 'Precisa ser maior que o limite de Alerta.';
-  }
-  return erros;
+  return null;
+}
+
+export function validarNomeDoLocal(nome: string): Validacao {
+  const limpo = nome.trim();
+  if (!limpo) return 'Dê um nome ao local.';
+  if (limpo.length < 2) return 'O nome precisa ter pelo menos 2 letras.';
+  if (limpo.length > 30) return 'Use no máximo 30 caracteres.';
+  return null;
 }
 
 export function semErros(erros: Record<string, Validacao>): boolean {

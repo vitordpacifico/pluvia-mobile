@@ -1,42 +1,32 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
-import type { PontoMonitorado } from '@/dominio/tipos';
+import { ESTADO_INICIAL } from '@/dominio/avisos';
+import { local, ocorrencia, risco } from '@/testes/fabricas';
 
+import { atualizarLista, CHAVES, lerJSON, lerLista } from '../armazenamento';
 import {
-  apagarAlertas,
-  confirmarSeguranca,
-  contarAlertasPendentes,
-  listarAlertas,
-  registrarAlerta,
-} from '../alertasServico';
-import { atualizarLista, lerJSON, lerLista } from '../armazenamento';
-import { lerCopiaPontos, salvarCopiaPontos } from '../cacheServico';
-import {
-  atualizarUltimoRisco,
-  deixarDeSeguir,
-  listarPontosSeguidos,
-  seguirPonto,
-} from '../pontosSeguidosServico';
+  contarNaoLidos,
+  lerEstadoConhecido,
+  lerPreferencias,
+  listarAvisos,
+  marcarTodosComoLidos,
+  registrarAvisos,
+  salvarPreferencias,
+} from '../avisosServico';
+import { lerCopiaMapa, salvarCopiaMapa } from '../cacheServico';
+import { CHAVES_COFRE } from '../cofre';
+import { adicionarFavorito, ErroLocal, listarLocais, removerLocal, salvarCarro } from '../locaisServico';
 
-const PONTO: PontoMonitorado = {
-  id: 'p1',
-  nome: 'Ponto 1',
-  endereco: 'Rua A',
-  regiao: 'São Paulo, SP',
-  nivelAtualCm: 12,
-  risco: 'ATENCAO',
-  riscoDetectadoEm: '2026-11-05T14:00:00Z',
-  atualizadoEm: '2026-11-05T14:00:10Z',
-  limites: { atencaoCm: 10, alertaCm: 25, evacuacaoCm: 40 },
-};
-
-function alerta(recebidoEm: string) {
+function novoAviso(chave: string, recebidoEm: string) {
   return {
-    pontoId: 'p1',
-    pontoNome: 'Ponto 1',
-    risco: 'ALERTA' as const,
-    nivelCm: 30,
-    detectadoEm: '2026-11-05T14:00:00Z',
+    tipo: 'NOVO' as const,
+    chave,
+    titulo: 'Alagamento perto de Meu carro',
+    texto: 'Texto',
+    ocorrenciaId: 'o1',
+    localId: 'carro',
+    detectadoEm: '2026-11-07T14:00:00Z',
     recebidoEm,
   };
 }
@@ -66,46 +56,70 @@ describe('armazenamento', () => {
   });
 });
 
-describe('alertas', () => {
-  it('lista do mais recente para o mais antigo e conta os pendentes', async () => {
-    await registrarAlerta('u1', alerta('2026-11-05T14:00:10Z'));
-    const segundo = await registrarAlerta('u1', alerta('2026-11-05T14:05:00Z'));
-    const lista = await listarAlertas('u1');
-    expect(lista[0].id).toBe(segundo.id);
-    expect(await contarAlertasPendentes('u1')).toBe(2);
-
-    await confirmarSeguranca('u1', segundo.id, '2026-11-05T14:06:00Z');
-    expect(await contarAlertasPendentes('u1')).toBe(1);
-    expect((await listarAlertas('u1'))[0].confirmadoEm).toBe('2026-11-05T14:06:00Z');
-  });
-
-  it('separa os alertas de cada usuário', async () => {
-    await registrarAlerta('u1', alerta('2026-11-05T14:00:10Z'));
-    expect(await listarAlertas('u2')).toEqual([]);
-    await apagarAlertas('u1');
-    expect(await listarAlertas('u1')).toEqual([]);
-  });
-});
-
-describe('pontos seguidos', () => {
-  it('segue, atualiza o risco e deixa de seguir', async () => {
-    await seguirPonto('u1', PONTO);
-    await seguirPonto('u1', PONTO);
-    expect(await listarPontosSeguidos('u1')).toEqual([
-      { pontoId: 'p1', pontoNome: 'Ponto 1', ultimoRisco: 'ATENCAO' },
+describe('avisos', () => {
+  it('lista do mais recente para o mais antigo, sem repetir a mesma chave', async () => {
+    await registrarAvisos('u1', [novoAviso('NOVO:o1', '2026-11-07T14:00:10Z')]);
+    const repetidos = await registrarAvisos('u1', [
+      novoAviso('NOVO:o1', '2026-11-07T14:00:20Z'),
+      novoAviso('NOVO:o2', '2026-11-07T14:05:00Z'),
     ]);
-    await atualizarUltimoRisco('u1', 'p1', 'EVACUACAO');
-    expect((await listarPontosSeguidos('u1'))[0].ultimoRisco).toBe('EVACUACAO');
-    await deixarDeSeguir('u1', 'p1');
-    expect(await listarPontosSeguidos('u1')).toEqual([]);
+    expect(repetidos).toHaveLength(1);
+    const lista = await listarAvisos('u1');
+    expect(lista.map((a) => a.chave)).toEqual(['NOVO:o2', 'NOVO:o1']);
+  });
+
+  it('conta e marca os não lidos', async () => {
+    await registrarAvisos('u1', [novoAviso('a', '2026-11-07T14:00:00Z'), novoAviso('b', '2026-11-07T14:01:00Z')]);
+    expect(await contarNaoLidos('u1')).toBe(2);
+    await marcarTodosComoLidos('u1', '2026-11-07T15:00:00Z');
+    expect(await contarNaoLidos('u1')).toBe(0);
+  });
+
+  it('completa as preferências com o padrão e lê o estado conhecido', async () => {
+    expect(await lerPreferencias('u1')).toEqual({ novos: true, encerramentos: true, riscoElevado: true, silenciado: false });
+    await salvarPreferencias('u1', { novos: false, encerramentos: true, riscoElevado: true, silenciado: true });
+    expect((await lerPreferencias('u1')).silenciado).toBe(true);
+    expect(await lerEstadoConhecido('u1')).toEqual(ESTADO_INICIAL);
+    await AsyncStorage.setItem(CHAVES.estadoAvisos('u1'), '"quebrado"');
+    expect(await lerEstadoConhecido('u1')).toEqual(ESTADO_INICIAL);
   });
 });
 
-describe('cópia local dos pontos', () => {
-  it('salva e lê a última lista', async () => {
-    expect(await lerCopiaPontos()).toBeNull();
-    const salvoEm = new Date('2026-11-05T14:00:20Z');
-    await salvarCopiaPontos([PONTO], salvoEm);
-    expect(await lerCopiaPontos()).toEqual({ pontos: [PONTO], salvoEm });
+describe('locais monitorados', () => {
+  it('guarda o carro e os favoritos no cofre, nunca no AsyncStorage', async () => {
+    await salvarCarro('u1', { ...local(), raioM: 500 });
+    await adicionarFavorito('u1', { ...local({ nome: 'Trabalho' }), raioM: 1000 });
+
+    expect(SecureStore.setItemAsync).toHaveBeenLastCalledWith(
+      CHAVES_COFRE.locais('u1'),
+      expect.stringContaining('Trabalho'),
+      expect.anything(),
+    );
+    const tudo = JSON.stringify(await AsyncStorage.multiGet(await AsyncStorage.getAllKeys()));
+    expect(tudo).not.toContain('-23.5679');
+    expect((await listarLocais('u1')).map((l) => l.tipo)).toEqual(['CARRO', 'FAVORITO']);
   });
+
+  it('troca o carro em vez de criar outro', async () => {
+    const primeiro = await salvarCarro('u3', local());
+    const segundo = await salvarCarro('u3', local({ referencia: 'Outra rua' }));
+    expect(segundo.id).toBe(primeiro.id);
+    expect(await listarLocais('u3')).toHaveLength(1);
+  });
+
+  it('limita os favoritos e remove um local', async () => {
+    for (let i = 0; i < 5; i++) await adicionarFavorito('u2', local({ nome: `Local ${i}` }));
+    await expect(adicionarFavorito('u2', local())).rejects.toThrow(ErroLocal);
+    const [primeiro] = await listarLocais('u2');
+    await removerLocal('u2', primeiro.id);
+    expect(await listarLocais('u2')).toHaveLength(4);
+  });
+});
+
+it('guarda e lê a cópia do mapa para usar sem conexão', async () => {
+  expect(await lerCopiaMapa()).toBeNull();
+  await salvarCopiaMapa({ ocorrencias: [ocorrencia()], riscos: [risco()], salvoEm: '2026-11-07T15:00:00Z' });
+  const copia = await lerCopiaMapa();
+  expect(copia?.ocorrencias[0].id).toBe('o1');
+  expect(copia?.salvoEm).toBe('2026-11-07T15:00:00Z');
 });

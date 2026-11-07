@@ -3,21 +3,22 @@ import { SplashScreen, Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import { AlertasProvider } from '@/contexto/AlertasContext';
 import { AutenticacaoProvider, useAutenticacao } from '@/contexto/AutenticacaoContext';
+import { AvisosProvider } from '@/contexto/AvisosContext';
 import { DadosProvider } from '@/contexto/DadosContext';
-import { ehAgente } from '@/dominio/usuario';
+import { LocaisProvider } from '@/contexto/LocaisContext';
+import { ehCidadao } from '@/dominio/usuario';
 import { cores } from '@/estilos/tema';
 import { configurarCanalDeAlertas } from '@/servicos/alertas/notificacoes';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-function useAbrirPontoPelaNotificacao() {
+function useAbrirOcorrenciaPelaNotificacao() {
   useEffect(() => {
     const assinatura = Notifications.addNotificationResponseReceivedListener((resposta) => {
-      const pontoId = resposta.notification.request.content.data?.pontoId;
-      if (typeof pontoId === 'string') {
-        router.push({ pathname: '/ponto/[id]', params: { id: pontoId } });
+      const ocorrenciaId = resposta.notification.request.content.data?.ocorrenciaId;
+      if (typeof ocorrenciaId === 'string') {
+        router.push({ pathname: '/ocorrencia/[id]', params: { id: ocorrenciaId } });
       }
     });
     return () => assinatura.remove();
@@ -26,7 +27,7 @@ function useAbrirPontoPelaNotificacao() {
 
 function Navegacao() {
   const { usuario, carregando } = useAutenticacao();
-  useAbrirPontoPelaNotificacao();
+  useAbrirOcorrenciaPelaNotificacao();
 
   useEffect(() => {
     if (!carregando) SplashScreen.hideAsync().catch(() => undefined);
@@ -50,10 +51,11 @@ function Navegacao() {
       </Stack.Protected>
       <Stack.Protected guard={usuario !== null}>
         <Stack.Screen name="(abas)" options={{ headerShown: false }} />
-        <Stack.Screen name="ponto/[id]" options={{ title: 'Ponto monitorado' }} />
+        <Stack.Screen name="ocorrencia/[id]" options={{ title: 'Ocorrência' }} />
+        <Stack.Screen name="relato/[id]" options={{ title: 'Relato' }} />
       </Stack.Protected>
-      <Stack.Protected guard={ehAgente(usuario)}>
-        <Stack.Screen name="limites/[id]" options={{ title: 'Ajustar limites' }} />
+      <Stack.Protected guard={ehCidadao(usuario)}>
+        <Stack.Screen name="areas" options={{ title: 'Áreas monitoradas' }} />
       </Stack.Protected>
     </Stack>
   );
@@ -69,10 +71,12 @@ export default function LayoutRaiz() {
   return (
     <AutenticacaoProvider>
       <DadosProvider>
-        <AlertasProvider>
-          <StatusBar style="light" />
-          <Navegacao />
-        </AlertasProvider>
+        <LocaisProvider>
+          <AvisosProvider>
+            <StatusBar style="light" />
+            <Navegacao />
+          </AvisosProvider>
+        </LocaisProvider>
       </DadosProvider>
     </AutenticacaoProvider>
   );

@@ -1,11 +1,4 @@
-import {
-  centimetrosParaTexto,
-  lerCentimetros,
-  mascararCentimetros,
-  mascararCep,
-  mascararTelefone,
-  somenteDigitos,
-} from '../mascaras';
+import { mascararCep, mascararHora, mascararTelefone, somenteDigitos } from '../mascaras';
 
 describe('mascararTelefone', () => {
   it.each([
@@ -36,31 +29,18 @@ describe('mascararCep', () => {
   });
 });
 
-describe('mascararCentimetros', () => {
+describe('mascararHora', () => {
   it.each([
     ['', ''],
-    ['12', '12'],
-    ['1234', '123'],
-    ['12,5', '12,5'],
-    ['12.5', '12,5'],
-    ['12,55', '12,5'],
-    ['1,2,3', '1,2'],
-    ['a1b0', '10'],
+    ['1', '1'],
+    ['14', '14'],
+    ['143', '14:3'],
+    ['1430', '14:30'],
+    ['14:305', '14:30'],
+    ['ab9h05', '90:5'],
   ])('%p vira %p', (digitado, esperado) => {
-    expect(mascararCentimetros(digitado)).toBe(esperado);
+    expect(mascararHora(digitado)).toBe(esperado);
   });
-});
-
-it('converte o texto de centímetros em número', () => {
-  expect(lerCentimetros('12,5')).toBe(12.5);
-  expect(lerCentimetros('40')).toBe(40);
-  expect(lerCentimetros('')).toBeNull();
-  expect(lerCentimetros(' ')).toBeNull();
-});
-
-it('converte número em texto com vírgula', () => {
-  expect(centimetrosParaTexto(12.5)).toBe('12,5');
-  expect(centimetrosParaTexto(40)).toBe('40');
 });
 
 it('remove tudo que não é dígito', () => {

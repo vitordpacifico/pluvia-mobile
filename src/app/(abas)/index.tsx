@@ -1,1 +1,1 @@
-export { default } from '@/telas/Pontos';
+export { default } from '@/telas/Mapa';

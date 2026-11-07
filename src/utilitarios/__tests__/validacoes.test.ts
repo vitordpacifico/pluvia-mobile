@@ -1,10 +1,14 @@
 import {
+  horaParaData,
   semErros,
   validarCep,
   validarConfirmacaoSenha,
+  validarDescricao,
   validarEmail,
-  validarLimites,
+  validarHoraDoRelato,
   validarNome,
+  validarNomeDoLocal,
+  validarReferencia,
   validarSenha,
   validarTelefone,
 } from '../validacoes';
@@ -69,20 +73,50 @@ describe('senha', () => {
   });
 });
 
-describe('validarLimites', () => {
-  it('aceita limites em ordem crescente', () => {
-    expect(semErros(validarLimites({ atencaoCm: 10, alertaCm: 25, evacuacaoCm: 40 }))).toBe(true);
+describe('hora do relato', () => {
+  const agora = new Date(2026, 10, 7, 15, 0);
+
+  it('aceita uma hora das últimas 6 horas', () => {
+    expect(validarHoraDoRelato('14:30', agora)).toBeNull();
+    expect(horaParaData('14:30', agora)?.getHours()).toBe(14);
   });
-  it('exige valores preenchidos e dentro da faixa', () => {
-    const erros = validarLimites({ atencaoCm: null, alertaCm: 0, evacuacaoCm: 301 });
-    expect(erros.atencaoCm).toMatch(/Informe/);
-    expect(erros.alertaCm).toMatch(/entre/);
-    expect(erros.evacuacaoCm).toMatch(/entre/);
+
+  it('entende uma hora maior que a atual como de ontem', () => {
+    const ontem = horaParaData('23:50', new Date(2026, 10, 7, 0, 10));
+    expect(ontem?.getDate()).toBe(6);
+    expect(validarHoraDoRelato('23:50', new Date(2026, 10, 7, 0, 10))).toBeNull();
   });
-  it('exige que cada nível comece acima do anterior', () => {
-    const erros = validarLimites({ atencaoCm: 30, alertaCm: 25, evacuacaoCm: 25 });
-    expect(erros.atencaoCm).toBeNull();
-    expect(erros.alertaCm).toMatch(/Atenção/);
-    expect(erros.evacuacaoCm).toMatch(/Alerta/);
+
+  it('recusa vazio, formato inválido e hora antiga demais', () => {
+    expect(validarHoraDoRelato('', agora)).toMatch(/Informe/);
+    expect(validarHoraDoRelato('25:99', agora)).toMatch(/inválida/);
+    expect(validarHoraDoRelato('14:3', agora)).toMatch(/inválida/);
+    expect(validarHoraDoRelato('08:00', agora)).toMatch(/6 horas/);
+  });
+});
+
+describe('textos do relato e dos locais', () => {
+  it('exige referência entre 3 e 80 caracteres', () => {
+    expect(validarReferencia('Rua Lavapés')).toBeNull();
+    expect(validarReferencia(' ')).toMatch(/Informe/);
+    expect(validarReferencia('ab')).toMatch(/3 letras/);
+    expect(validarReferencia('a'.repeat(81))).toMatch(/80/);
+  });
+
+  it('exige descrição só quando é obrigatória e limita o tamanho', () => {
+    expect(validarDescricao('', false)).toBeNull();
+    expect(validarDescricao('', true)).toMatch(/Descreva/);
+    expect(validarDescricao('a'.repeat(201), false)).toMatch(/200/);
+  });
+
+  it('valida o nome do local favorito', () => {
+    expect(validarNomeDoLocal('Trabalho')).toBeNull();
+    expect(validarNomeDoLocal('')).toMatch(/nome/);
+    expect(validarNomeDoLocal('a'.repeat(31))).toMatch(/30/);
+  });
+
+  it('diz se um formulário não tem erros', () => {
+    expect(semErros({ a: null, b: null })).toBe(true);
+    expect(semErros({ a: null, b: 'erro' })).toBe(false);
   });
 });

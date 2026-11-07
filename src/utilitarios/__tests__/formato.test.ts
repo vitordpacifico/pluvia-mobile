@@ -1,4 +1,4 @@
-import { formatarCm, formatarDuracao } from '../formato';
+import { formatarCm, formatarDuracao, formatarHaQuanto, formatarHoraCurta } from '../formato';
 
 it.each([
   [0, '0 segundos'],
@@ -12,4 +12,17 @@ it.each([
 
 it('usa vírgula decimal nos centímetros', () => {
   expect(formatarCm(14.46)).toBe('14,5 cm');
+});
+
+it('diz há quanto tempo algo aconteceu', () => {
+  const agora = Date.parse('2026-11-07T15:00:00Z');
+  expect(formatarHaQuanto('2026-11-07T14:59:50Z', agora)).toBe('agora mesmo');
+  expect(formatarHaQuanto('2026-11-07T14:35:00Z', agora)).toBe('há 25 min');
+  expect(formatarHaQuanto('2026-11-07T12:00:00Z', agora)).toBe('há 3 h');
+  expect(formatarHaQuanto('2026-11-05T15:00:00Z', agora)).toBe('há 2 dia(s)');
+});
+
+it('mostra a hora sem os segundos', () => {
+  const data = new Date(2026, 10, 7, 9, 5, 42);
+  expect(formatarHoraCurta(data.toISOString())).toBe('09:05');
 });

@@ -2,11 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 
 import { CHAVES } from '../armazenamento';
+import { listarLocais, salvarCarro } from '../locaisServico';
 import { encerrarSessao, iniciarSessao, lerSessao } from '../sessaoServico';
 import {
   atualizarCidadao,
   autenticar,
   cadastrarCidadao,
+  CARRO_DEMONSTRACAO,
   CONTAS_DEMONSTRACAO,
   ErroCadastro,
   excluirConta,
@@ -56,12 +58,19 @@ it('autentica só com a senha correta', async () => {
   expect(await autenticar('outra@email.com', 'Senha123')).toBeNull();
 });
 
+it('cria a cidadã de demonstração com o carro já salvo', async () => {
+  await garantirContasDemonstracao();
+  const cidada = await autenticar('cidadao@pluvia.demo', 'Cidadao123');
+  const locais = await listarLocais(cidada?.id ?? '');
+  expect(locais).toMatchObject([{ tipo: 'CARRO', bairro: 'Cambuci', raioM: 500 }]);
+});
+
 it('cria as contas de demonstração uma única vez', async () => {
   await garantirContasDemonstracao();
   await garantirContasDemonstracao();
   const contas = JSON.parse((await AsyncStorage.getItem(CHAVES.contas)) ?? '[]');
   expect(contas).toHaveLength(CONTAS_DEMONSTRACAO.length);
-  const agente = await autenticar('agente@sentinela.demo', 'Agente123');
+  const agente = await autenticar('agente@pluvia.demo', 'Agente123');
   expect(agente?.perfil).toBe('agente');
 });
 
@@ -71,9 +80,9 @@ it('atualiza os dados do cidadão', async () => {
     nome: 'Ana S.',
     telefone: '(21) 3456-7890',
     cep: '20000-000',
-    tipoCidadao: 'comerciante',
+    tipoCidadao: 'entregador',
   });
-  expect(atualizado).toMatchObject({ nome: 'Ana S.', tipoCidadao: 'comerciante', email: 'ana@email.com' });
+  expect(atualizado).toMatchObject({ nome: 'Ana S.', tipoCidadao: 'entregador', email: 'ana@email.com' });
   expect(await autenticar('ana@email.com', 'Senha123')).not.toBeNull();
 });
 
@@ -87,14 +96,16 @@ it('guarda e encerra a sessão', async () => {
 it('exclui a conta e os dados dela, sem mexer nas outras contas', async () => {
   const ana = await cadastrarCidadao(DADOS);
   const bia = await cadastrarCidadao({ ...DADOS, email: 'bia@email.com' });
-  await AsyncStorage.setItem(CHAVES.alertas(ana.id), '[]');
-  await AsyncStorage.setItem(CHAVES.pontosSeguidos(ana.id), '[]');
+  await AsyncStorage.setItem(CHAVES.avisos(ana.id), '[]');
+  await AsyncStorage.setItem(CHAVES.preferencias(ana.id), '{}');
+  await salvarCarro(ana.id, { ...CARRO_DEMONSTRACAO, local: { ...CARRO_DEMONSTRACAO.local } });
 
   await excluirConta(ana.id);
 
   expect(await obterUsuario(ana.id)).toBeNull();
-  expect(await AsyncStorage.getItem(CHAVES.alertas(ana.id))).toBeNull();
-  expect(await AsyncStorage.getItem(CHAVES.pontosSeguidos(ana.id))).toBeNull();
+  expect(await AsyncStorage.getItem(CHAVES.avisos(ana.id))).toBeNull();
+  expect(await AsyncStorage.getItem(CHAVES.preferencias(ana.id))).toBeNull();
+  expect(await listarLocais(ana.id)).toEqual([]);
   expect(await obterUsuario(bia.id)).not.toBeNull();
 });
 
@@ -106,7 +117,7 @@ describe('cofre do telefone e do CEP', () => {
     expect(salvo).not.toContain('91234-5678');
     expect(salvo).not.toContain('01001-000');
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
-      `sentinela.protegido.${usuario.id}`,
+      `pluvia.protegido.${usuario.id}`,
       expect.stringContaining('91234-5678'),
       expect.objectContaining({ keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY }),
     );
@@ -127,7 +138,7 @@ describe('cofre do telefone e do CEP', () => {
 
   it('move para o cofre os dados de contas salvas antes dele', async () => {
     const usuario = await cadastrarCidadao(DADOS);
-    await SecureStore.deleteItemAsync(`sentinela.protegido.${usuario.id}`);
+    await SecureStore.deleteItemAsync(`pluvia.protegido.${usuario.id}`);
     const contas = JSON.parse((await AsyncStorage.getItem(CHAVES.contas)) ?? '[]');
     contas[0] = { ...contas[0], telefone: '(11) 98888-7777', cep: '04000-000' };
     await AsyncStorage.setItem(CHAVES.contas, JSON.stringify(contas));
@@ -141,14 +152,14 @@ describe('cofre do telefone e do CEP', () => {
   it('apaga o cofre ao excluir a conta', async () => {
     const usuario = await cadastrarCidadao(DADOS);
     await excluirConta(usuario.id);
-    expect(await SecureStore.getItemAsync(`sentinela.protegido.${usuario.id}`)).toBeNull();
+    expect(await SecureStore.getItemAsync(`pluvia.protegido.${usuario.id}`)).toBeNull();
   });
 
   it('não cria cofre para o agente', async () => {
     await garantirContasDemonstracao();
-    const agente = await autenticar('agente@sentinela.demo', 'Agente123');
+    const agente = await autenticar('agente@pluvia.demo', 'Agente123');
     expect(agente).not.toHaveProperty('telefone');
-    const cidada = await autenticar('cidadao@sentinela.demo', 'Cidadao123');
+    const cidada = await autenticar('cidadao@pluvia.demo', 'Cidadao123');
     expect(cidada).toMatchObject({ telefone: '(11) 91234-5678' });
   });
 });

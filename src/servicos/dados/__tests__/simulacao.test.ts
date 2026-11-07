@@ -1,97 +1,102 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { PontoMonitorado } from '@/dominio/tipos';
-import { CHAVES } from '@/servicos/armazenamento/armazenamento';
+import { estadoExibido } from '@/dominio/ocorrencia';
+import type { NovoRelato } from '@/dominio/relato';
+import { PERTO_DO_CAMBUCI } from '@/testes/fabricas';
 
-import { fonteSimulada, reiniciarSimulacao, simularChuvaForte } from '../simulacao';
+import { fonteSimulada, reiniciarSimulacao } from '../simulacao';
 
-const INICIO = Date.UTC(2026, 10, 5, 14, 0, 0);
+const INICIO = Date.parse('2026-11-07T15:00:00Z');
 
-async function pontosAos(segundos: number): Promise<PontoMonitorado[]> {
-  jest.setSystemTime(INICIO + segundos * 1000);
-  const promessa = fonteSimulada.listarPontos();
-  await jest.advanceTimersByTimeAsync(300);
-  return promessa;
+const NOVO_RELATO: NovoRelato = {
+  tipo: 'RUA_ALAGADA',
+  descricao: 'Água na altura da calçada',
+  bairro: 'Cambuci',
+  referencia: 'Rua Lavapés',
+  local: PERTO_DO_CAMBUCI,
+  ocorridoEm: '2026-11-07T14:55:00Z',
+  fotoUri: 'file:///foto-limpa.jpg',
+};
+
+async function avancar(ms: number) {
+  await jest.advanceTimersByTimeAsync(ms);
 }
 
-function risco(pontos: PontoMonitorado[], id: string) {
-  return pontos.find((p) => p.id === id)!.risco;
+async function ocorrenciasAgora() {
+  const pedido = fonteSimulada.listarOcorrencias();
+  await avancar(300);
+  return pedido;
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   jest.useFakeTimers({ now: INICIO });
-  reiniciarSimulacao();
+  await AsyncStorage.clear();
+  reiniciarSimulacao(INICIO);
 });
 
 afterEach(() => jest.useRealTimers());
 
-it('começa sem risco em nenhum ponto', async () => {
-  const pontos = await pontosAos(0);
-  expect(pontos.map((p) => p.risco)).toEqual(['NORMAL', 'NORMAL', 'NORMAL']);
+it('traz ocorrências oficiais de demonstração ativas, encerradas e sem dados recentes', async () => {
+  const ocorrencias = await ocorrenciasAgora();
+  const estados = new Set(ocorrencias.map((o) => estadoExibido(o, INICIO)));
+  expect(estados).toEqual(new Set(['ATIVO', 'ENCERRADO', 'SEM_DADOS']));
+  expect(ocorrencias.every((o) => o.fonte.nome.length > 0 && o.registradaEm)).toBe(true);
 });
 
-it('o ponto A passa por todos os níveis e volta ao normal', async () => {
-  const vistos: string[] = [];
-  for (let s = 0; s <= 350; s += 10) {
-    const atual = risco(await pontosAos(s), 'demo-a');
-    if (vistos[vistos.length - 1] !== atual) vistos.push(atual);
-  }
-  expect(vistos).toEqual(['NORMAL', 'ATENCAO', 'ALERTA', 'EVACUACAO', 'ALERTA', 'ATENCAO', 'NORMAL']);
+it('abre e depois encerra uma ocorrência quando a chuva passa pelo sensor', async () => {
+  await avancar(100_000);
+  const durante = (await ocorrenciasAgora()).filter((o) => o.fonte.tipo === 'SENSOR');
+  expect(durante).toHaveLength(1);
+  expect(durante[0]).toMatchObject({ status: 'ATIVO', bairro: 'Cambuci' });
+
+  await avancar(220_000);
+  const depois = (await ocorrenciasAgora()).filter((o) => o.id === durante[0].id);
+  expect(depois[0].status).toBe('ENCERRADO');
+  expect(depois[0].historico.map((h) => h.status)).toEqual(['ATIVO', 'ENCERRADO']);
 });
 
-it('informa quando o risco atual foi detectado', async () => {
-  const pontoA = (await pontosAos(150)).find((p) => p.id === 'demo-a')!;
-  expect(pontoA.risco).toBe('EVACUACAO');
-  expect(Date.parse(pontoA.riscoDetectadoEm!)).toBeLessThanOrEqual(INICIO + 150_000);
+it('marca o risco estimado como elevado enquanto o sensor mede água', async () => {
+  await avancar(100_000);
+  const pedido = fonteSimulada.listarRiscos();
+  const riscos = await pedido;
+  expect(riscos.find((r) => r.id === 'risco-cambuci')?.faixa).toBe('ELEVADO');
+  expect(riscos.find((r) => r.id === 'risco-vila-mariana')?.faixa).toBe('BAIXO');
 });
 
-it('o ponto C simula um sensor sem sinal há 2 horas', async () => {
-  const pontoC = (await pontosAos(0)).find((p) => p.id === 'demo-c')!;
-  expect(INICIO - Date.parse(pontoC.atualizadoEm)).toBeGreaterThanOrEqual(2 * 60 * 60_000);
+it('deixa o relato em análise com a triagem simulada, e publica depois da revisão', async () => {
+  const envio = fonteSimulada.enviarRelato('u1', NOVO_RELATO);
+  await avancar(1200);
+  const relato = await envio;
+  expect(relato.status).toBe('EM_ANALISE');
+  expect(relato.triagem).toMatchObject({ categoria: 'INDICIO', simulada: true });
+  expect(await fonteSimulada.listarRelatos({ status: 'EM_ANALISE' })).toHaveLength(1);
+
+  const publicado = await fonteSimulada.revisarRelato(relato.id, { publicar: true });
+  expect(publicado).toMatchObject({ status: 'PUBLICADO', ocorrenciaId: `relato-${relato.id}` });
+  const comunitaria = (await ocorrenciasAgora()).find((o) => o.relatoId === relato.id);
+  expect(comunitaria && estadoExibido(comunitaria, INICIO)).toBe('COMUNITARIO');
 });
 
-it('o agente pode simular chuva forte em outro ponto', async () => {
-  expect(risco(await pontosAos(0), 'demo-b')).toBe('NORMAL');
-  simularChuvaForte('demo-b');
-  expect(risco(await pontosAos(150), 'demo-b')).toBe('EVACUACAO');
-  expect(() => simularChuvaForte('nao-existe')).toThrow('Ponto não encontrado.');
+it('relato sem foto não passa pela IA e pode ser excluído pelo autor', async () => {
+  const envio = fonteSimulada.enviarRelato('u1', { ...NOVO_RELATO, fotoUri: null });
+  await avancar(1200);
+  const relato = await envio;
+  expect(relato.triagem).toBeNull();
+  await fonteSimulada.excluirRelato('outra-pessoa', relato.id);
+  expect(await fonteSimulada.listarRelatos({ autorId: 'u1' })).toHaveLength(1);
+  await fonteSimulada.excluirRelato('u1', relato.id);
+  expect(await fonteSimulada.listarRelatos({ autorId: 'u1' })).toHaveLength(0);
 });
 
-it('devolve 18 leituras em ordem cronológica', async () => {
-  jest.setSystemTime(INICIO + 100_000);
-  const promessa = fonteSimulada.listarLeituras('demo-a');
-  await jest.advanceTimersByTimeAsync(300);
-  const leituras = await promessa;
-  expect(leituras).toHaveLength(18);
-  for (let i = 1; i < leituras.length; i++) {
-    expect(Date.parse(leituras[i].medidoEm)).toBeGreaterThan(Date.parse(leituras[i - 1].medidoEm));
-  }
+it('encerra uma ocorrência oficial pela simulação da fonte', async () => {
+  await fonteSimulada.encerrarOcorrencia('oficial-1');
+  const encerrada = (await ocorrenciasAgora()).find((o) => o.id === 'oficial-1');
+  expect(encerrada?.status).toBe('ENCERRADO');
+  expect(encerrada?.historico.at(-1)?.descricao).toBe('A fonte marcou a ocorrência como encerrada.');
+  await expect(fonteSimulada.encerrarOcorrencia('sensor-1-123')).rejects.toThrow('próprias leituras');
 });
 
-it('recusa um ponto que não existe', async () => {
-  const promessa = fonteSimulada.listarLeituras('nao-existe');
-  const verificacao = expect(promessa).rejects.toThrow('Ponto não encontrado.');
-  await jest.advanceTimersByTimeAsync(300);
-  await verificacao;
-});
-
-it('aplica e salva os limites ajustados pelo agente', async () => {
-  await fonteSimulada.atualizarLimites('demo-a', { atencaoCm: 20, alertaCm: 45, evacuacaoCm: 60 });
-  const pontoA = (await pontosAos(180)).find((p) => p.id === 'demo-a')!;
-  expect(pontoA.limites.evacuacaoCm).toBe(60);
-  expect(pontoA.risco).toBe('ALERTA');
-  expect(JSON.parse((await AsyncStorage.getItem(CHAVES.limitesSimulacao)) ?? '{}')).toHaveProperty('demo-a');
-});
-
-it('continua a chuva simulada depois que o app é aberto de novo', async () => {
-  simularChuvaForte('demo-b');
-  await jest.advanceTimersByTimeAsync(0);
-
-  await jest.isolateModulesAsync(async () => {
-    const nova = jest.requireActual<typeof import('../simulacao')>('../simulacao');
-    jest.setSystemTime(INICIO + 150_000);
-    const promessa = nova.fonteSimulada.listarPontos();
-    await jest.advanceTimersByTimeAsync(300);
-    expect(risco(await promessa, 'demo-b')).toBe('EVACUACAO');
-  });
+it('não simula chuva em sensor sem sinal', async () => {
+  await expect(fonteSimulada.simularChuva('sensor-3')).rejects.toThrow('sem sinal');
+  await expect(fonteSimulada.simularChuva('sensor-9')).rejects.toThrow('não encontrado');
 });

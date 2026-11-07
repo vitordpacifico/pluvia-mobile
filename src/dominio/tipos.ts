@@ -1,50 +1,40 @@
-export type NivelRisco = 'NORMAL' | 'ATENCAO' | 'ALERTA' | 'EVACUACAO';
+import type { Coordenada } from './geo';
+import type { Ocorrencia } from './ocorrencia';
+import type { NovoRelato, Relato, StatusRelato } from './relato';
+import type { RiscoEstimado } from './riscoEstimado';
+import type { Leitura } from './sensor';
 
-export interface LimitesRisco {
-  atencaoCm: number;
-  alertaCm: number;
-  evacuacaoCm: number;
-}
-
-export interface PontoMonitorado {
+export interface SensorNivel {
   id: string;
   nome: string;
-  endereco: string;
-  regiao: string;
-  nivelAtualCm: number;
-  risco: NivelRisco;
-  riscoDetectadoEm: string | null;
+  bairro: string;
+  referencia: string;
+  local: Coordenada;
+  nivelCm: number;
   atualizadoEm: string;
-  limites: LimitesRisco;
+  leituras: Leitura[];
 }
 
-export interface Leitura {
-  pontoId: string;
-  nivelCm: number;
-  medidoEm: string;
+export interface FiltroRelatos {
+  autorId?: string;
+  status?: StatusRelato;
+}
+
+export interface DecisaoModeracao {
+  publicar: boolean;
+  motivo?: string;
 }
 
 export interface FonteDeDados {
   readonly simulada: boolean;
-  listarPontos(): Promise<PontoMonitorado[]>;
-  listarLeituras(pontoId: string): Promise<Leitura[]>;
-  registrarConfirmacao(pontoId: string, confirmadoEm: string): Promise<void>;
-  atualizarLimites(pontoId: string, limites: LimitesRisco): Promise<void>;
-}
-
-export interface AlertaRegistrado {
-  id: string;
-  pontoId: string;
-  pontoNome: string;
-  risco: NivelRisco;
-  nivelCm: number;
-  detectadoEm: string;
-  recebidoEm: string;
-  confirmadoEm: string | null;
-}
-
-export interface PontoSeguido {
-  pontoId: string;
-  pontoNome: string;
-  ultimoRisco: NivelRisco;
+  listarOcorrencias(): Promise<Ocorrencia[]>;
+  listarRiscos(): Promise<RiscoEstimado[]>;
+  listarSensores(): Promise<SensorNivel[]>;
+  enviarRelato(autorId: string, relato: NovoRelato): Promise<Relato>;
+  listarRelatos(filtro: FiltroRelatos): Promise<Relato[]>;
+  excluirRelato(autorId: string, relatoId: string): Promise<void>;
+  excluirRelatosDoAutor(autorId: string): Promise<void>;
+  revisarRelato(relatoId: string, decisao: DecisaoModeracao): Promise<Relato>;
+  encerrarOcorrencia(ocorrenciaId: string): Promise<void>;
+  simularChuva(sensorId: string): Promise<void>;
 }

@@ -1,99 +1,59 @@
-import type { PontoMonitorado } from '@/dominio/tipos';
-import * as alertas from '@/servicos/armazenamento/alertasServico';
-import * as seguidos from '@/servicos/armazenamento/pontosSeguidosServico';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 
-import { verificarPontosSeguidos } from '../monitor';
+import { salvarPreferencias } from '@/servicos/armazenamento/avisosServico';
+import { salvarCarro } from '@/servicos/armazenamento/locaisServico';
+import { local, ocorrencia, VILA_MARIANA } from '@/testes/fabricas';
+
+import { verificarAvisos } from '../monitor';
 import * as notificacoes from '../notificacoes';
 
 jest.mock('expo-haptics', () => ({
-  notificationAsync: jest.fn(() => Promise.resolve()),
-  NotificationFeedbackType: { Warning: 'warning', Error: 'error' },
+  NotificationFeedbackType: { Warning: 'warning' },
+  notificationAsync: jest.fn(async () => undefined),
 }));
-jest.mock('@/servicos/armazenamento/pontosSeguidosServico', () => ({
-  listarPontosSeguidos: jest.fn(),
-  atualizarUltimoRisco: jest.fn(),
-}));
-jest.mock('@/servicos/armazenamento/alertasServico', () => ({ registrarAlerta: jest.fn() }));
 jest.mock('../notificacoes', () => ({
-  notificacoesPermitidas: jest.fn(),
-  notificarMudancaDeRisco: jest.fn(),
+  notificacoesPermitidas: jest.fn(async () => true),
+  notificarAviso: jest.fn(async () => undefined),
 }));
 
-const USUARIO = 'u1';
-const AGORA = new Date('2026-11-05T14:01:11Z');
-const mockSeguidos = jest.mocked(seguidos);
-const mockAlertas = jest.mocked(alertas);
 const mockNotificacoes = jest.mocked(notificacoes);
+const AGORA = () => new Date('2026-11-07T15:00:00Z');
 
-function ponto(risco: PontoMonitorado['risco']): PontoMonitorado {
-  return {
-    id: 'p1',
-    nome: 'Ponto 1',
-    endereco: 'Rua A',
-    regiao: 'São Paulo, SP',
-    nivelAtualCm: 30,
-    risco,
-    riscoDetectadoEm: '2026-11-05T14:01:00Z',
-    atualizadoEm: '2026-11-05T14:01:10Z',
-    limites: { atencaoCm: 10, alertaCm: 25, evacuacaoCm: 40 },
-  };
-}
-
-function seguindo(ultimoRisco: PontoMonitorado['risco']) {
-  mockSeguidos.listarPontosSeguidos.mockResolvedValue([
-    { pontoId: 'p1', pontoNome: 'Ponto 1', ultimoRisco },
-  ]);
-}
-
-beforeEach(() => {
+beforeEach(async () => {
+  await AsyncStorage.clear();
   jest.clearAllMocks();
-  mockNotificacoes.notificacoesPermitidas.mockResolvedValue(true);
+  await salvarCarro('u1', local());
+  await verificarAvisos('u1', [], [], AGORA);
 });
 
-it('cria alerta e notifica quando o risco piora', async () => {
-  seguindo('NORMAL');
-  const novos = await verificarPontosSeguidos(USUARIO, [ponto('ALERTA')], () => AGORA);
-
-  expect(novos).toBe(1);
-  expect(mockSeguidos.atualizarUltimoRisco).toHaveBeenCalledWith(USUARIO, 'p1', 'ALERTA');
-  expect(mockAlertas.registrarAlerta).toHaveBeenCalledWith(USUARIO, {
-    pontoId: 'p1',
-    pontoNome: 'Ponto 1',
-    risco: 'ALERTA',
-    nivelCm: 30,
-    detectadoEm: '2026-11-05T14:01:00Z',
-    recebidoEm: AGORA.toISOString(),
-  });
-  expect(mockNotificacoes.notificarMudancaDeRisco).toHaveBeenCalledTimes(1);
+it('avisa, notifica e vibra quando surge um alagamento perto do carro', async () => {
+  const novos = await verificarAvisos('u1', [ocorrencia()], [], AGORA);
+  expect(novos).toHaveLength(1);
+  expect(novos[0].titulo).toBe('Alagamento perto de Meu carro');
+  expect(mockNotificacoes.notificarAviso).toHaveBeenCalledWith(novos[0]);
+  expect(Haptics.notificationAsync).toHaveBeenCalled();
 });
 
-it('só atualiza o risco quando ele melhora', async () => {
-  seguindo('EVACUACAO');
-  expect(await verificarPontosSeguidos(USUARIO, [ponto('ATENCAO')], () => AGORA)).toBe(0);
-  expect(mockSeguidos.atualizarUltimoRisco).toHaveBeenCalledWith(USUARIO, 'p1', 'ATENCAO');
-  expect(mockAlertas.registrarAlerta).not.toHaveBeenCalled();
+it('não repete o aviso na verificação seguinte', async () => {
+  await verificarAvisos('u1', [ocorrencia()], [], AGORA);
+  expect(await verificarAvisos('u1', [ocorrencia()], [], AGORA)).toEqual([]);
 });
 
-it('não faz nada quando o risco não muda', async () => {
-  seguindo('ALERTA');
-  expect(await verificarPontosSeguidos(USUARIO, [ponto('ALERTA')], () => AGORA)).toBe(0);
-  expect(mockSeguidos.atualizarUltimoRisco).not.toHaveBeenCalled();
+it('ignora alagamentos longe dos locais monitorados', async () => {
+  expect(await verificarAvisos('u1', [ocorrencia({ local: VILA_MARIANA })], [], AGORA)).toEqual([]);
 });
 
-it('ignora pontos que o morador não acompanha', async () => {
-  mockSeguidos.listarPontosSeguidos.mockResolvedValue([]);
-  expect(await verificarPontosSeguidos(USUARIO, [ponto('EVACUACAO')], () => AGORA)).toBe(0);
+it('registra o aviso, mas não notifica quando a pessoa silenciou', async () => {
+  await salvarPreferencias('u1', { novos: true, encerramentos: true, riscoElevado: true, silenciado: true });
+  const novos = await verificarAvisos('u1', [ocorrencia()], [], AGORA);
+  expect(novos).toHaveLength(1);
+  expect(mockNotificacoes.notificarAviso).not.toHaveBeenCalled();
 });
 
-it('registra o alerta mesmo sem permissão de notificação', async () => {
-  seguindo('NORMAL');
-  mockNotificacoes.notificacoesPermitidas.mockResolvedValue(false);
-  expect(await verificarPontosSeguidos(USUARIO, [ponto('ATENCAO')], () => AGORA)).toBe(1);
-  expect(mockNotificacoes.notificarMudancaDeRisco).not.toHaveBeenCalled();
-});
-
-it('usa o horário da última leitura se a API não informar a detecção', async () => {
-  seguindo('NORMAL');
-  await verificarPontosSeguidos(USUARIO, [{ ...ponto('ALERTA'), riscoDetectadoEm: null }], () => AGORA);
-  expect(mockAlertas.registrarAlerta.mock.calls[0][1].detectadoEm).toBe('2026-11-05T14:01:10Z');
+it('registra o aviso mesmo sem permissão de notificação', async () => {
+  mockNotificacoes.notificacoesPermitidas.mockResolvedValueOnce(false);
+  const novos = await verificarAvisos('u1', [ocorrencia()], [], AGORA);
+  expect(novos).toHaveLength(1);
+  expect(mockNotificacoes.notificarAviso).not.toHaveBeenCalled();
 });

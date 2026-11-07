@@ -1,15 +1,14 @@
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Aviso } from '@/componentes/Aviso';
+import { Marca } from '@/componentes/Marca';
 import { Botao } from '@/componentes/Botao';
 import { CampoTexto } from '@/componentes/CampoTexto';
 import { ErroLogin, useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { estilosComuns } from '@/estilos/comuns';
-import { cores } from '@/estilos/tema';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 import { CONTAS_DEMONSTRACAO } from '@/servicos/armazenamento/usuariosServico';
 import { validarEmail, validarObrigatorio } from '@/utilitarios/validacoes';
@@ -62,19 +61,10 @@ export default function TelaEntrar() {
       >
         <ScrollView contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
           <View style={estilos.marca}>
-            <MaterialCommunityIcons
-              name="water-alert"
-              size={56}
-              color={cores.primaria}
-              accessibilityElementsHidden
-              importantForAccessibility="no"
-            />
-            <Text style={estilos.nomeApp} accessibilityRole="header">
-              SENTINELA
-            </Text>
+            <Marca />
             <Text style={estilos.slogan}>
-              Avisamos quando a água começa a subir, para você ter tempo de proteger sua família,
-              sua casa e seu comércio.
+              Alagamentos perto de você, do seu carro e dos seus trajetos, com a fonte e a hora de cada
+              informação.
             </Text>
           </View>
 
@@ -120,8 +110,8 @@ export default function TelaEntrar() {
                 Contas de demonstração
               </Text>
               <Text style={estilosComuns.legenda}>
-                Preenchem o login com uma conta de teste. Agentes da Defesa Civil não se cadastram
-                pelo app: o acesso é criado pelo órgão.
+                Preenchem o login com uma conta de teste. A equipe de monitoramento não se cadastra
+                pelo app: o acesso é criado pela coordenação.
               </Text>
               <View style={estilos.botoesDemo}>
                 <Botao
@@ -131,7 +121,7 @@ export default function TelaEntrar() {
                   onPress={() => preencherDemonstracao(0)}
                 />
                 <Botao
-                  rotulo="Usar conta de agente"
+                  rotulo="Usar conta da equipe"
                   variante="secundario"
                   icone="shield-account"
                   onPress={() => preencherDemonstracao(1)}
@@ -141,7 +131,7 @@ export default function TelaEntrar() {
           )}
 
           <Text style={estilosComuns.rodape}>
-            O SENTINELA não substitui as orientações oficiais da Defesa Civil.
+            O Pluvia não substitui os comunicados oficiais. Em emergência, ligue 199 ou 193.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>

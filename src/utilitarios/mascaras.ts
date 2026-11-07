@@ -16,20 +16,7 @@ export function mascararCep(texto: string): string {
   return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
 }
 
-export function mascararCentimetros(texto: string): string {
-  const limpo = texto.replace(/\./g, ',').replace(/[^\d,]/g, '');
-  const [inteiro = '', ...resto] = limpo.split(',');
-  const parteInteira = inteiro.slice(0, 3);
-  if (!limpo.includes(',')) return parteInteira;
-  return `${parteInteira},${resto.join('').slice(0, 1)}`;
-}
-
-export function lerCentimetros(texto: string): number | null {
-  if (!texto.trim()) return null;
-  const numero = Number(texto.replace(',', '.'));
-  return Number.isFinite(numero) ? numero : null;
-}
-
-export function centimetrosParaTexto(valor: number): string {
-  return String(Math.round(valor * 10) / 10).replace('.', ',');
+export function mascararHora(texto: string): string {
+  const d = somenteDigitos(texto).slice(0, 4);
+  return d.length > 2 ? `${d.slice(0, 2)}:${d.slice(2)}` : d;
 }

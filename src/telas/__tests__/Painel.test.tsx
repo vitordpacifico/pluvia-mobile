@@ -1,29 +1,40 @@
 import { render, screen } from '@testing-library/react-native';
 
 import { useDados } from '@/contexto/DadosContext';
-import type { NivelRisco, PontoMonitorado } from '@/dominio/tipos';
+import type { SensorNivel } from '@/dominio/tipos';
+import { fonteDeDados } from '@/servicos/dados/fonte';
+import { CAMBUCI, ocorrencia } from '@/testes/fabricas';
 
 import TelaPainel from '../Painel';
 
 jest.mock('@/contexto/DadosContext', () => ({ useDados: jest.fn() }));
 
-function ponto(id: string, risco: NivelRisco, minutosSemLeitura = 0): PontoMonitorado {
+const minutosAtras = (minutos: number) => new Date(Date.now() - minutos * 60_000).toISOString();
+
+function sensor(id: string, nivelCm: number, minutosSemLeitura = 0): SensorNivel {
   return {
     id,
-    nome: `Ponto ${id}`,
-    endereco: 'Rua',
-    regiao: 'São Paulo, SP',
-    nivelAtualCm: risco === 'EVACUACAO' ? 45 : 2,
-    risco,
-    riscoDetectadoEm: null,
-    atualizadoEm: new Date(Date.now() - minutosSemLeitura * 60_000).toISOString(),
-    limites: { atencaoCm: 10, alertaCm: 25, evacuacaoCm: 40 },
+    nome: `Sensor ${id}`,
+    bairro: 'Cambuci',
+    referencia: 'Av. do Estado',
+    local: CAMBUCI,
+    nivelCm,
+    atualizadoEm: minutosAtras(minutosSemLeitura),
+    leituras: [{ nivelCm, medidoEm: minutosAtras(minutosSemLeitura) }],
   };
 }
 
 beforeEach(() => {
+  jest.spyOn(fonteDeDados, 'listarRelatos').mockResolvedValue([]);
   jest.mocked(useDados).mockReturnValue({
-    pontos: [ponto('A', 'EVACUACAO'), ponto('B', 'NORMAL'), ponto('C', 'NORMAL', 120)],
+    ocorrencias: [
+      ocorrencia({ id: 'a' }),
+      ocorrencia({ id: 'b', atualizadaEm: minutosAtras(120) }),
+      ocorrencia({ id: 'c', status: 'ENCERRADO', encerradaEm: minutosAtras(30) }),
+      ocorrencia({ id: 'd', fonte: { tipo: 'COMUNIDADE', nome: 'Relato comunitário verificado' } }),
+    ],
+    riscos: [],
+    sensores: [sensor('1', 32), sensor('3', 2, 120)],
     carregando: false,
     erro: null,
     origem: 'rede',
@@ -33,26 +44,23 @@ beforeEach(() => {
   });
 });
 
-it('conta os pontos por nível', async () => {
+it('conta as ocorrências por situação', async () => {
   await render(<TelaPainel />);
-  expect(screen.getByLabelText('2 pontos em Normal')).toBeTruthy();
-  expect(screen.getByLabelText('1 pontos em Evacuação')).toBeTruthy();
-  expect(screen.getByLabelText('0 pontos em Alerta')).toBeTruthy();
+  expect(screen.getByLabelText('1 ocorrência(s): Confirmado • ativo')).toBeTruthy();
+  expect(screen.getByLabelText('1 ocorrência(s): Sem dados recentes')).toBeTruthy();
+  expect(screen.getByLabelText('1 ocorrência(s): Encerrado')).toBeTruthy();
+  expect(screen.getByLabelText('1 ocorrência(s): Possível alagamento • relato comunitário')).toBeTruthy();
 });
 
-it('lista os pontos em risco e os sensores sem sinal', async () => {
+it('mostra o nível dos sensores e avisa o sensor sem sinal', async () => {
   await render(<TelaPainel />);
-  expect(screen.getByText('Ponto A: 45,0 cm')).toBeTruthy();
-  expect(screen.getByText(/Ponto C: última leitura/)).toBeTruthy();
+  expect(screen.getByText('Água: 32,0 cm')).toBeTruthy();
+  expect(screen.getByText(/Sem leituras há 2 h/)).toBeTruthy();
 });
 
-it('explica a regra das duas leituras', async () => {
+it('mostra os controles da simulação IoT só para sensores com sinal', async () => {
   await render(<TelaPainel />);
-  expect(screen.getByText(/só muda depois de 2 leituras seguidas/)).toBeTruthy();
-});
-
-it('mostra os controles da simulação IoT', async () => {
-  await render(<TelaPainel />);
-  expect(screen.getByRole('button', { name: 'Reiniciar simulação' })).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Simular chuva em Ponto de demonstração B' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Simular chuva no Sensor 1' })).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Simular chuva no Sensor 3' })).toBeNull();
+  expect(screen.getByRole('link', { name: 'Reiniciar a demonstração' })).toBeTruthy();
 });

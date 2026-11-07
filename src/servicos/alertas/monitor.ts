@@ -1,50 +1,50 @@
 import * as Haptics from 'expo-haptics';
 import { AccessibilityInfo } from 'react-native';
 
-import { gravidade, INFO_RISCO } from '@/dominio/risco';
-import type { PontoMonitorado } from '@/dominio/tipos';
-import { registrarAlerta } from '@/servicos/armazenamento/alertasServico';
+import { calcularAvisos } from '@/dominio/avisos';
+import type { Aviso } from '@/dominio/local';
+import type { Ocorrencia } from '@/dominio/ocorrencia';
+import type { RiscoEstimado } from '@/dominio/riscoEstimado';
 import {
-  atualizarUltimoRisco,
-  listarPontosSeguidos,
-} from '@/servicos/armazenamento/pontosSeguidosServico';
+  lerEstadoConhecido,
+  lerPreferencias,
+  registrarAvisos,
+  salvarEstadoConhecido,
+} from '@/servicos/armazenamento/avisosServico';
+import { listarLocais } from '@/servicos/armazenamento/locaisServico';
+import { formatarHoraCurta } from '@/utilitarios/formato';
 
-import { notificacoesPermitidas, notificarMudancaDeRisco } from './notificacoes';
+import { notificacoesPermitidas, notificarAviso } from './notificacoes';
 
-export async function verificarPontosSeguidos(
+export async function verificarAvisos(
   usuarioId: string,
-  pontos: PontoMonitorado[],
+  ocorrencias: Ocorrencia[],
+  riscos: RiscoEstimado[],
   agora: () => Date = () => new Date(),
-): Promise<number> {
-  const seguidos = await listarPontosSeguidos(usuarioId);
-  let novos = 0;
+): Promise<Aviso[]> {
+  const [locais, preferencias, conhecido] = await Promise.all([
+    listarLocais(usuarioId),
+    lerPreferencias(usuarioId),
+    lerEstadoConhecido(usuarioId),
+  ]);
+  const resultado = calcularAvisos({
+    locais,
+    preferencias,
+    ocorrencias,
+    riscos,
+    conhecido,
+    agora: agora(),
+    formatarHora: formatarHoraCurta,
+  });
+  await salvarEstadoConhecido(usuarioId, resultado.conhecido);
+  const registrados = await registrarAvisos(usuarioId, resultado.avisos);
+  if (registrados.length === 0 || preferencias.silenciado) return registrados;
 
-  for (const seguido of seguidos) {
-    const ponto = pontos.find((p) => p.id === seguido.pontoId);
-    if (!ponto || ponto.risco === seguido.ultimoRisco) continue;
-
-    await atualizarUltimoRisco(usuarioId, ponto.id, ponto.risco);
-    if (gravidade(ponto.risco) <= gravidade(seguido.ultimoRisco)) continue;
-
-    await registrarAlerta(usuarioId, {
-      pontoId: ponto.id,
-      pontoNome: ponto.nome,
-      risco: ponto.risco,
-      nivelCm: ponto.nivelAtualCm,
-      detectadoEm: ponto.riscoDetectadoEm ?? ponto.atualizadoEm,
-      recebidoEm: agora().toISOString(),
-    });
-    novos++;
-
-    if (await notificacoesPermitidas().catch(() => false)) await notificarMudancaDeRisco(ponto);
-    await Haptics.notificationAsync(
-      ponto.risco === 'EVACUACAO'
-        ? Haptics.NotificationFeedbackType.Error
-        : Haptics.NotificationFeedbackType.Warning,
-    ).catch(() => undefined);
-    AccessibilityInfo.announceForAccessibility(
-      `${INFO_RISCO[ponto.risco].rotulo} em ${ponto.nome}. ${INFO_RISCO[ponto.risco].orientacao}`,
-    );
+  const podeNotificar = await notificacoesPermitidas().catch(() => false);
+  for (const aviso of registrados) {
+    if (podeNotificar) await notificarAviso(aviso).catch(() => undefined);
+    AccessibilityInfo.announceForAccessibility(`${aviso.titulo}. ${aviso.texto}`);
   }
-  return novos;
+  await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => undefined);
+  return registrados;
 }
