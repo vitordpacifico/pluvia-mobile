@@ -31,7 +31,6 @@ export default function TelaAlertas() {
       .catch(() => setErro('Não foi possível carregar os alertas.'));
   }, [usuarioId]);
 
-  // Recarrega ao abrir a aba e sempre que um alerta é criado ou confirmado.
   const focada = useIsFocused();
   useEffect(() => {
     if (focada) carregar();

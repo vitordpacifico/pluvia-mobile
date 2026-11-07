@@ -6,11 +6,6 @@ import { useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { ehAgente, ehCidadao } from '@/dominio/usuario';
 import { cores } from '@/estilos/tema';
 
-/**
- * Abas por perfil:
- * - cidadão: Pontos, Alertas e Perfil;
- * - agente: Pontos, Painel e Perfil.
- */
 export default function LayoutAbas() {
   const { usuario } = useAutenticacao();
   const { pendentes } = useAlertas();

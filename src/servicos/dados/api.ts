@@ -1,11 +1,6 @@
 import { ehNivelRisco } from '@/dominio/risco';
 import type { FonteDeDados, Leitura, LimitesRisco, PontoMonitorado } from '@/dominio/tipos';
 
-/**
- * Cliente da API real em C#. O contrato é uma proposta, descrita em docs/API.md,
- * e precisa ser combinado com quem desenvolve a API.
- */
-
 const TEMPO_LIMITE_MS = 10_000;
 
 async function requisitar(url: string, opcoes: RequestInit = {}): Promise<unknown> {
@@ -47,7 +42,6 @@ function numero(objeto: Record<string, unknown>, campo: string): number {
   return valor;
 }
 
-/** Confere o formato do que chega da rede antes de usar no app. */
 function lerPonto(bruto: unknown): PontoMonitorado {
   if (!ehObjeto(bruto) || !ehObjeto(bruto.limites)) throw new Error('Resposta inválida da API.');
   const risco = bruto.risco;

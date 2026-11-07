@@ -10,10 +10,8 @@ import { ehAgente } from '@/dominio/usuario';
 import { cores } from '@/estilos/tema';
 import { configurarCanalDeAlertas } from '@/servicos/alertas/notificacoes';
 
-// Mantém a tela de abertura até a sessão ser lida, para não piscar a tela errada.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-/** Ao tocar na notificação, abre o ponto que gerou o alerta. */
 function useAbrirPontoPelaNotificacao() {
   useEffect(() => {
     const assinatura = Notifications.addNotificationResponseReceivedListener((resposta) => {
@@ -26,12 +24,6 @@ function useAbrirPontoPelaNotificacao() {
   }, []);
 }
 
-/**
- * Rotas protegidas por login e por perfil:
- * - sem login: só Entrar e Cadastro;
- * - logado: abas e detalhe do ponto;
- * - agente: também o formulário de limites.
- */
 function Navegacao() {
   const { usuario, carregando } = useAutenticacao();
   useAbrirPontoPelaNotificacao();

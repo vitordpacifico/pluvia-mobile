@@ -22,7 +22,6 @@ import {
   type DadosCadastroCidadao,
 } from '@/servicos/armazenamento/usuariosServico';
 
-/** Depois de 5 senhas erradas seguidas, o login fica bloqueado por 30 segundos. */
 const MAXIMO_TENTATIVAS = 5;
 const BLOQUEIO_MS = 30_000;
 
@@ -30,13 +29,11 @@ export class ErroLogin extends Error {}
 
 interface EstadoAutenticacao {
   usuario: Usuario | null;
-  /** Verdadeiro enquanto a sessão salva ainda está sendo lida. */
   carregando: boolean;
   entrar: (email: string, senha: string) => Promise<void>;
   cadastrar: (dados: DadosCadastroCidadao) => Promise<void>;
   atualizar: (dados: DadosAtualizacaoCidadao) => Promise<void>;
   sair: () => Promise<void>;
-  /** Confere a senha antes de apagar. Só contas de cidadão podem ser excluídas pelo app. */
   excluirConta: (senha: string) => Promise<void>;
 }
 
@@ -47,7 +44,6 @@ export function AutenticacaoProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true);
   const falhas = useRef({ quantidade: 0, bloqueadoAte: 0 });
 
-  // Cria as contas de demonstração e restaura a sessão, se houver.
   useEffect(() => {
     garantirContasDemonstracao()
       .then(lerSessao)

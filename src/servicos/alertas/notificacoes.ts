@@ -5,12 +5,6 @@ import { Platform } from 'react-native';
 import { INFO_RISCO } from '@/dominio/risco';
 import type { PontoMonitorado } from '@/dominio/tipos';
 
-/**
- * Notificações locais, geradas pelo próprio app. Funcionam no Expo Go.
- * Notificações enviadas pelo servidor (push) não funcionam no Expo Go para
- * Android desde o SDK 53, então o app consulta a API e avisa sozinho.
- */
-
 const CANAL_ALERTAS = 'alertas-alagamento';
 
 Notifications.setNotificationHandler({

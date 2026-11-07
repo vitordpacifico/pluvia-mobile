@@ -1,6 +1,5 @@
 import { CHAVES, lerJSON, remover, salvarJSON } from './armazenamento';
 
-/** Mantém a pessoa logada depois de fechar o app. Guarda só o id, nunca a senha. */
 interface Sessao {
   usuarioId: string;
   iniciadaEm: string;

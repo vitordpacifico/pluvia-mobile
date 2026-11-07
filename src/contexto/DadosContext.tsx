@@ -14,10 +14,8 @@ import type { PontoMonitorado } from '@/dominio/tipos';
 import { lerCopiaPontos, salvarCopiaPontos } from '@/servicos/armazenamento/cacheServico';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 
-/** De quanto em quanto tempo o app consulta os pontos enquanto está aberto. */
 export const INTERVALO_ATUALIZACAO_MS = 10_000;
 
-/** De onde vieram os pontos mostrados: da consulta mais recente ou da cópia salva no celular. */
 export type OrigemDados = 'rede' | 'copia-local';
 
 interface EstadoDados {
@@ -25,7 +23,6 @@ interface EstadoDados {
   carregando: boolean;
   erro: string | null;
   origem: OrigemDados | null;
-  /** Momento em que os pontos mostrados foram obtidos. */
   obtidosEm: Date | null;
   simulada: boolean;
   recarregar: () => Promise<void>;
@@ -38,10 +35,6 @@ function mensagemDeErro(erro: unknown): string {
   return 'Não foi possível carregar os dados.';
 }
 
-/**
- * Uma única consulta periódica, compartilhada por todas as telas e pelo monitor de risco.
- * Cada resposta é salva no AsyncStorage. Sem conexão, o app mostra a última cópia salva.
- */
 export function DadosProvider({ children }: { children: ReactNode }) {
   const [pontos, setPontos] = useState<PontoMonitorado[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -51,7 +44,6 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   const emAndamento = useRef(false);
   const recebeuDaRede = useRef(false);
 
-  /** Ignora a chamada se já houver uma consulta em andamento. */
   const recarregar = useCallback((): Promise<void> => {
     if (emAndamento.current) return Promise.resolve();
     emAndamento.current = true;
@@ -75,7 +67,6 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
-  // Mostra a cópia salva enquanto a primeira consulta não responde.
   useEffect(() => {
     lerCopiaPontos()
       .then((copia) => {

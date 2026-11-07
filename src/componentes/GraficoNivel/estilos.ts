@@ -21,7 +21,6 @@ export const estilos = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: cores.textoSecundario,
   },
-  // Fundo branco para o rótulo não se misturar com as barras.
   rotuloLinha: {
     fontSize: 11,
     fontWeight: '600',

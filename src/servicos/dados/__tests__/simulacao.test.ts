@@ -7,7 +7,6 @@ import { fonteSimulada, reiniciarSimulacao, simularChuvaForte } from '../simulac
 
 const INICIO = Date.UTC(2026, 10, 5, 14, 0, 0);
 
-/** Avança o relógio falso até `segundos` depois do início e consulta os pontos. */
 async function pontosAos(segundos: number): Promise<PontoMonitorado[]> {
   jest.setSystemTime(INICIO + segundos * 1000);
   const promessa = fonteSimulada.listarPontos();
@@ -77,7 +76,6 @@ it('recusa um ponto que não existe', async () => {
 });
 
 it('aplica e salva os limites ajustados pelo agente', async () => {
-  // Com limites altos, 48 cm de água ficam em Alerta, e não em Evacuação.
   await fonteSimulada.atualizarLimites('demo-a', { atencaoCm: 20, alertaCm: 45, evacuacaoCm: 60 });
   const pontoA = (await pontosAos(180)).find((p) => p.id === 'demo-a')!;
   expect(pontoA.limites.evacuacaoCm).toBe(60);
@@ -89,7 +87,6 @@ it('continua a chuva simulada depois que o app é aberto de novo', async () => {
   simularChuvaForte('demo-b');
   await jest.advanceTimersByTimeAsync(0);
 
-  // Carrega o módulo do zero, como se o app tivesse sido fechado e aberto.
   await jest.isolateModulesAsync(async () => {
     const nova = jest.requireActual<typeof import('../simulacao')>('../simulacao');
     jest.setSystemTime(INICIO + 150_000);

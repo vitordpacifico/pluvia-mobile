@@ -20,7 +20,6 @@ import { formatarCm, formatarDataHora } from '@/utilitarios/formato';
 
 import { estilos } from './estilos';
 
-/** Visao geral para o agente da Defesa Civil: todos os pontos de uma vez. */
 export default function TelaPainel() {
   const { pontos, simulada, recarregar, erro } = useDados();
   const [mensagem, setMensagem] = useState<string | null>(null);

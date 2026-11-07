@@ -63,6 +63,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Telefone e CEP movidos para o cofre do sistema (`expo-secure-store`), com migração das contas já salvas, remoção do cofre na exclusão de conta e 5 testes novos (134 no total).
 
+### 9. Remover os comentários do código (07/11/2026)
+
+**Pedido:** Remover os comentários de todos os arquivos de código, seguindo o que o aluno já tinha feito em `src/app/_layout.tsx`.
+
+**Resultado:** Comentários removidos dos 46 arquivos de código, sem alterar nenhuma linha de código. Testes, checagem de tipos e lint sem erros.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **agente da Defesa Civil**. A tarefa cita como exemplo "cidadão e agente ou profissional".

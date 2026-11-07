@@ -3,17 +3,6 @@ import { Platform } from 'react-native';
 
 import { lerJSON, remover, salvarJSON } from './armazenamento';
 
-/**
- * Cofre do celular para os dados de contato do cidadão (telefone e CEP).
- *
- * No Android e no iOS, o expo-secure-store grava no Keystore e no Keychain do sistema,
- * criptografado e preso a este aparelho. Esses dados nunca vão para o AsyncStorage,
- * que guarda tudo em texto aberto.
- *
- * O navegador não tem cofre. A versão web serve só para demonstração e prints,
- * por isso lá os dados ficam no armazenamento comum.
- */
-
 export interface DadosProtegidos {
   telefone?: string;
   cep?: string;
@@ -25,7 +14,6 @@ const OPCOES: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
 };
 
-/** O SecureStore só aceita letras, números, ".", "-" e "_" no nome da chave. */
 function chaveDoCofre(usuarioId: string): string {
   return `sentinela.protegido.${usuarioId}`;
 }

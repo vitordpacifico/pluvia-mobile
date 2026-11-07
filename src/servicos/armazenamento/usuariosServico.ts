@@ -6,16 +6,11 @@ import { calcularHashSenha, gerarSal, senhaConfere } from '@/servicos/seguranca/
 import { atualizarLista, CHAVES, lerLista, remover } from './armazenamento';
 import { apagarProtegido, guardarProtegido, lerProtegido, type DadosProtegidos } from './cofre';
 
-/**
- * Conta como fica salva no AsyncStorage: os dados do usuário sem o telefone e o CEP,
- * que vão para o cofre, mais o sal e o hash da senha.
- */
 interface ContaSalva extends Omit<Usuario, keyof DadosProtegidos> {
   sal: string;
   senhaHash: string;
 }
 
-/** Formato antigo, de antes do cofre: o telefone e o CEP ficavam junto da conta. */
 type ContaAntiga = ContaSalva & DadosProtegidos;
 
 export interface DadosCadastroCidadao {
@@ -36,10 +31,6 @@ export interface DadosAtualizacaoCidadao {
 
 export class ErroCadastro extends Error {}
 
-/**
- * Contas criadas no primeiro uso para a demonstração, listadas no README.
- * Agentes não se cadastram pelo app: o acesso viria do órgão responsável.
- */
 export const CONTAS_DEMONSTRACAO = [
   {
     nome: 'Cidadã de demonstração',
@@ -63,14 +54,12 @@ export function normalizarEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-/** Junta a conta salva com os dados do cofre e tira o sal e o hash, que as telas não usam. */
 async function paraUsuario(conta: ContaSalva): Promise<Usuario> {
   const { sal: _sal, senhaHash: _hash, ...usuario } = conta;
   if (usuario.perfil !== 'cidadao') return usuario;
   return { ...usuario, ...(await lerProtegido(conta.id)) };
 }
 
-/** Separa o telefone e o CEP do resto, para cada parte ir ao seu lugar. */
 function separarProtegidos<T extends DadosProtegidos>(dados: T): [Omit<T, keyof DadosProtegidos>, DadosProtegidos] {
   const { telefone, cep, ...resto } = dados;
   const protegidos: DadosProtegidos = {};
@@ -79,7 +68,6 @@ function separarProtegidos<T extends DadosProtegidos>(dados: T): [Omit<T, keyof 
   return [resto, protegidos];
 }
 
-/** Cria a conta e já guarda o telefone e o CEP no cofre. */
 async function montarConta(dados: Omit<Usuario, 'id' | 'criadoEm'>, senha: string): Promise<ContaSalva> {
   const [publicos, protegidos] = separarProtegidos(dados);
   const sal = gerarSal();
@@ -95,7 +83,6 @@ async function montarConta(dados: Omit<Usuario, 'id' | 'criadoEm'>, senha: strin
   return conta;
 }
 
-/** Move para o cofre o telefone e o CEP de contas salvas antes dele existir. */
 async function migrarContasAntigas(): Promise<void> {
   const contas = await lerLista<ContaAntiga>(CHAVES.contas);
   const antigas = contas.filter((conta) => conta.telefone !== undefined || conta.cep !== undefined);
@@ -145,7 +132,6 @@ export async function cadastrarCidadao(dados: DadosCadastroCidadao): Promise<Usu
   return paraUsuario(conta);
 }
 
-/** Devolve o usuário se o e-mail e a senha conferirem. Caso contrário, null. */
 export async function autenticar(email: string, senha: string): Promise<Usuario | null> {
   const contas = await lerLista<ContaSalva>(CHAVES.contas);
   const conta = contas.find((c) => c.email === normalizarEmail(email));
@@ -163,7 +149,6 @@ export async function atualizarCidadao(
   id: string,
   dados: DadosAtualizacaoCidadao,
 ): Promise<Usuario> {
-  // Só estes campos podem mudar: e-mail, perfil e senha ficam como estão.
   const publicos = { nome: dados.nome.trim(), tipoCidadao: dados.tipoCidadao };
   const protegidos: DadosProtegidos = { telefone: dados.telefone, cep: dados.cep };
   const existentes = await lerLista<ContaSalva>(CHAVES.contas);
@@ -178,10 +163,6 @@ export async function atualizarCidadao(
   return paraUsuario(conta);
 }
 
-/**
- * Apaga a conta e todos os dados dela neste celular: telefone e CEP do cofre, pontos acompanhados e alertas.
- * Atende ao direito de eliminação dos dados previsto na LGPD.
- */
 export async function excluirConta(id: string): Promise<void> {
   await atualizarLista<ContaSalva>(CHAVES.contas, (contas) => contas.filter((c) => c.id !== id));
   await Promise.all([

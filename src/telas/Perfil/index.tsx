@@ -41,7 +41,6 @@ function Dado({ rotulo, valor }: { rotulo: string; valor: string }) {
   );
 }
 
-/** Formulário de edição do cidadão, com as mesmas máscaras e validações do cadastro. */
 function EditarCidadao({ usuario }: { usuario: Usuario }) {
   const { atualizar } = useAutenticacao();
   const [nome, setNome] = useState(usuario.nome);
@@ -112,7 +111,6 @@ function EditarCidadao({ usuario }: { usuario: Usuario }) {
   );
 }
 
-/** Exclusão da conta: pede a senha de novo para evitar que outra pessoa apague por engano. */
 function ExcluirConta() {
   const { excluirConta } = useAutenticacao();
   const [aberto, setAberto] = useState(false);

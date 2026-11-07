@@ -1,10 +1,7 @@
-/* Substitui modulos nativos por versoes que rodam no Node durante os testes. */
-
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
-// Cofre falso em memória, no lugar do Keychain e do Keystore.
 jest.mock('expo-secure-store', () => {
   const cofre = new Map();
   return {
@@ -31,7 +28,6 @@ jest.mock('expo-crypto', () => {
   };
 });
 
-// Navegação falsa: as telas são testadas isoladas, sem o Expo Router.
 jest.mock('expo-router', () => {
   const React = require('react');
   return {

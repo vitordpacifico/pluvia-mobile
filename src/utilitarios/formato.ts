@@ -2,13 +2,11 @@ function doisDigitos(valor: number): string {
   return String(valor).padStart(2, '0');
 }
 
-/** 14:05:09 */
 export function formatarHora(iso: string): string {
   const data = new Date(iso);
   return `${doisDigitos(data.getHours())}:${doisDigitos(data.getMinutes())}:${doisDigitos(data.getSeconds())}`;
 }
 
-/** 05/11 14:05 */
 export function formatarDataHora(iso: string): string {
   const data = new Date(iso);
   return `${doisDigitos(data.getDate())}/${doisDigitos(data.getMonth() + 1)} ${doisDigitos(
@@ -16,7 +14,6 @@ export function formatarDataHora(iso: string): string {
   )}:${doisDigitos(data.getMinutes())}`;
 }
 
-/** 45 segundos | 3 min 20 s | 2 h 5 min */
 export function formatarDuracao(ms: number): string {
   const segundos = Math.max(0, Math.round(ms / 1000));
   if (segundos < 60) return `${segundos} segundos`;

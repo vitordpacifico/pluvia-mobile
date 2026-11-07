@@ -1,4 +1,3 @@
-/** Cores com contraste mínimo de 4.5:1 entre texto e fundo (WCAG AA). */
 export const cores = {
   fundo: '#F4F6F8',
   superficie: '#FFFFFF',
@@ -21,5 +20,4 @@ export const espaco = { p: 8, m: 16, g: 24 } as const;
 
 export const raio = { m: 10, g: 12 } as const;
 
-/** Área mínima de toque recomendada para acessibilidade. */
 export const ALVO_MINIMO_TOQUE = 48;

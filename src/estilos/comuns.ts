@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 
 import { cores, espaco, raio } from './tema';
 
-/** Estilos repetidos em varias telas. */
 export const estilosComuns = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.fundo },
   conteudo: { padding: espaco.m, gap: espaco.m, paddingBottom: espaco.g + espaco.p },

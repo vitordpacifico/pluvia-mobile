@@ -17,19 +17,13 @@ import { useAutenticacao } from './AutenticacaoContext';
 import { useDados } from './DadosContext';
 
 interface EstadoAlertas {
-  /** Alertas ainda sem "Estou em segurança". Aparece na aba Alertas. */
   pendentes: number;
-  /** Muda sempre que um alerta é criado, confirmado ou apagado. A tela Alertas recarrega com ele. */
   versao: number;
   avisarMudanca: () => void;
 }
 
 const AlertasContext = createContext<EstadoAlertas | null>(null);
 
-/**
- * Para o cidadão logado: confere os pontos seguidos a cada atualização e cria os alertas.
- * Para o agente, não faz nada: ele acompanha tudo pelo painel.
- */
 export function AlertasProvider({ children }: { children: ReactNode }) {
   const { usuario } = useAutenticacao();
   const { pontos, origem } = useDados();
@@ -47,7 +41,6 @@ export function AlertasProvider({ children }: { children: ReactNode }) {
       .catch((e) => console.warn('Falha ao contar os alertas', e));
   }, [usuarioId, versao]);
 
-  // A cópia local pode estar velha: só dados recem-consultados geram alerta.
   useEffect(() => {
     if (!usuarioId || origem !== 'rede' || pontos.length === 0 || verificando.current) return;
     verificando.current = true;

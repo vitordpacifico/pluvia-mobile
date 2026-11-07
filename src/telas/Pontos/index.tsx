@@ -31,7 +31,6 @@ export default function TelaPontos() {
     }, [usuario, cidadao]),
   );
 
-  /** Os pontos com maior risco aparecem primeiro. */
   const ordenados = useMemo(
     () => [...pontos].sort((a, b) => gravidade(b.risco) - gravidade(a.risco)),
     [pontos],

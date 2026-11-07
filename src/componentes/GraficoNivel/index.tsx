@@ -13,10 +13,6 @@ interface Props {
 
 const COR_NORMAL = '#2E7D32';
 
-/**
- * Barras com o nível de cada leitura e linhas nos limites de risco.
- * Para o leitor de tela, o gráfico vira um resumo em texto.
- */
 export function GraficoNivel({ leituras, limites }: Props) {
   if (leituras.length === 0) {
     return <Text style={estilos.vazio}>Ainda não há leituras deste ponto.</Text>;
@@ -57,7 +53,6 @@ export function GraficoNivel({ leituras, limites }: Props) {
             );
           })}
         </View>
-        {/* As linhas vêm depois das barras para ficarem por cima e o rótulo continuar legível. */}
         {linhas.map((linha) => (
           <View key={linha.risco} style={[estilos.linha, { bottom: altura(linha.cm) }]}>
             <Text style={estilos.rotuloLinha}>

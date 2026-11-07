@@ -12,7 +12,6 @@ async function abrirTela() {
       <TelaEntrar />
     </AutenticacaoProvider>,
   );
-  // Espera as contas de demonstração serem criadas.
   await waitFor(async () => expect(await AsyncStorage.getItem('@sentinela:contas')).not.toBeNull());
 }
 

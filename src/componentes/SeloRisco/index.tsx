@@ -11,7 +11,6 @@ interface Props {
   grande?: boolean;
 }
 
-/** Mostra o risco com ícone, texto e cor juntos: nunca só pela cor. */
 export function SeloRisco({ risco, grande = false }: Props) {
   const info = INFO_RISCO[risco];
   return (

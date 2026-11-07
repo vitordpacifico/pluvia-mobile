@@ -1,12 +1,5 @@
 import * as Crypto from 'expo-crypto';
 
-/**
- * A senha nunca é salva em texto. O app guarda só um sal aleatório e o hash SHA-256 de sal + senha.
- *
- * Limite conhecido: em um sistema real a autenticação ficaria no servidor, com um algoritmo lento
- * feito para senhas (bcrypt ou Argon2). Aqui o login é local porque a API ainda não existe.
- */
-
 function paraHex(bytes: Uint8Array): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
@@ -19,7 +12,6 @@ export async function calcularHashSenha(senha: string, sal: string): Promise<str
   return Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, `${sal}:${senha}`);
 }
 
-/** Compara todos os caracteres, mesmo depois de achar uma diferença, para não vazar tempo. */
 export function hashesIguais(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diferenca = 0;

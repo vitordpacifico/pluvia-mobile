@@ -15,7 +15,6 @@ interface Props<T extends string> {
   onMudar: (valor: T) => void;
 }
 
-/** Escolha única. Para o leitor de tela, funciona como botões de opção (radio). */
 export function GrupoOpcoes<T extends string>({ rotulo, opcoes, valor, onMudar }: Props<T>) {
   return (
     <View style={estilos.grupo}>

@@ -16,7 +16,6 @@ export const estilos = StyleSheet.create({
   topo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   nome: { fontSize: 18, fontWeight: '700', color: cores.texto, flex: 1 },
   endereco: { fontSize: 14, color: cores.textoSecundario },
-  // flexWrap evita que o texto saia do cartao com a fonte do celular aumentada.
   linha: {
     flexDirection: 'row',
     flexWrap: 'wrap',

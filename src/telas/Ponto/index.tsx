@@ -46,7 +46,6 @@ export default function TelaPonto() {
       .catch((e) => console.warn('Falha ao ler os pontos seguidos', e));
   }, [usuario, agente, id]);
 
-  // Recarrega o histórico sempre que chega uma leitura nova.
   const atualizadoEm = ponto?.atualizadoEm;
   useEffect(() => {
     if (!id || !atualizadoEm) return;
