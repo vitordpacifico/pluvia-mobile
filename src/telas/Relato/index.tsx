@@ -91,7 +91,12 @@ export default function TelaRelato() {
   }
 
   return (
-    <ScrollView style={estilosComuns.tela} contentContainerStyle={estilosComuns.conteudo}>
+    <ScrollView
+      style={estilosComuns.tela}
+      contentContainerStyle={estilosComuns.conteudo}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
+    >
       {mensagem && <Aviso tipo="info" texto={mensagem} />}
 
       <View style={estilosComuns.cartao}>

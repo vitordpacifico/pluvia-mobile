@@ -46,6 +46,7 @@ jest.mock('react-native-safe-area-context', () =>
 jest.mock('expo-location', () => ({
   Accuracy: { Balanced: 3 },
   requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: true })),
+  getLastKnownPositionAsync: jest.fn(async () => null),
   getCurrentPositionAsync: jest.fn(async () => ({
     coords: { latitude: -23.5662, longitude: -46.6196 },
   })),

@@ -91,7 +91,12 @@ export default function TelaAreas() {
   }
 
   return (
-    <ScrollView style={estilosComuns.tela} contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={estilosComuns.tela}
+      contentContainerStyle={estilosComuns.conteudo}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
+    >
       <View style={estilosComuns.cartao}>
         <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
           Quais avisos receber

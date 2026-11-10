@@ -117,6 +117,8 @@ export default function TelaMapa() {
       data={lista}
       keyExtractor={(item) => item.ocorrencia.id}
       contentContainerStyle={estilos.lista}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
       refreshControl={
         <RefreshControl
           refreshing={atualizando}

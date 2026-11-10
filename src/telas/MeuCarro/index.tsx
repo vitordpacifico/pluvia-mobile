@@ -116,7 +116,12 @@ export default function TelaMeuCarro() {
   }
 
   return (
-    <ScrollView style={estilosComuns.tela} contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={estilosComuns.tela}
+      contentContainerStyle={estilosComuns.conteudo}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
+    >
       <Text style={estilosComuns.titulo} accessibilityRole="header">
         Meu carro
       </Text>

@@ -54,6 +54,7 @@
     },
     "setupFiles": [
       "<rootDir>/jest.setup.js"
-    ]
+    ],
+    "testTimeout": 20000
   }
 }

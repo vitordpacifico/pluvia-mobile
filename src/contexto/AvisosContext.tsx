@@ -11,6 +11,7 @@ import {
 
 import { ehCidadao } from '@/dominio/usuario';
 import { verificarAvisos } from '@/servicos/alertas/monitor';
+import { pedirPermissaoDeNotificacao } from '@/servicos/alertas/notificacoes';
 import { contarNaoLidos } from '@/servicos/armazenamento/avisosServico';
 
 import { useAutenticacao } from './AutenticacaoContext';
@@ -35,6 +36,11 @@ export function AvisosProvider({ children }: { children: ReactNode }) {
   const usuarioId = usuario && ehCidadao(usuario) ? usuario.id : null;
 
   const avisarMudanca = useCallback(() => setVersao((v) => v + 1), []);
+
+  useEffect(() => {
+    if (!usuarioId) return;
+    pedirPermissaoDeNotificacao().catch(() => undefined);
+  }, [usuarioId]);
 
   useEffect(() => {
     if (!usuarioId) return;

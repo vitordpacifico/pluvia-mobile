@@ -89,6 +89,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Logotipo na tela de entrar, ícones do app gerados a partir dele e cor principal igual ao azul do logotipo. Repositório renomeado para `pluvia-mobile`. Na revisão: troca de uma função obsoleta do `expo-image-manipulator`, cores de pino que o Android consegue mostrar, legenda dos pinos e a chuva do sensor 1 recomeçando sempre que o app abre.
 
+### 12. Revisão do código antes do teste no celular (10/11/2026)
+
+**Pedido:** Revisar todo o código antes de rodar o aplicativo no celular.
+
+**Resultado:** Pedido de permissão de notificação ao entrar como cidadão, campos que não ficam escondidos pelo teclado no iPhone, limite de tempo e última posição conhecida no GPS, e tempo maior para os testes automáticos.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.

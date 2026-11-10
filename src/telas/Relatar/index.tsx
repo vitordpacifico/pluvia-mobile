@@ -129,7 +129,12 @@ export default function TelaRelatar() {
   }
 
   return (
-    <ScrollView style={estilosComuns.tela} contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={estilosComuns.tela}
+      contentContainerStyle={estilosComuns.conteudo}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
+    >
       <Text style={estilosComuns.titulo} accessibilityRole="header">
         Relatar alagamento
       </Text>
