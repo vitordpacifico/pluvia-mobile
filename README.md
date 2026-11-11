@@ -76,6 +76,19 @@ npx expo start
 
 Leia o QR code com o Expo Go (Android) ou com a câmera (iPhone). O celular e o computador precisam estar na mesma rede Wi-Fi. Se não estiverem, use `npx expo start --tunnel`.
 
+### Rodar no navegador do computador
+
+```bash
+npx expo start --web
+```
+
+O app abre no navegador em tamanho de celular, centralizado na tela. Na web:
+
+- o mapa usa o OpenStreetMap, com os mesmos pinos, raios e áreas de risco do celular;
+- os avisos chegam como notificações do navegador (permita quando o navegador perguntar);
+- a câmera abre a escolha de arquivo do computador;
+- o carro, os favoritos, o telefone e o CEP ficam no armazenamento do navegador, porque a web não tem o cofre do sistema.
+
 ### Contas de demonstração
 
 Criadas automaticamente no primeiro uso. Na tela de login, os botões "Usar conta de cidadão" e "Usar conta da equipe" preenchem os dados.
@@ -99,7 +112,7 @@ Também é possível criar uma conta de cidadão em **Criar conta**. A equipe n�
 
 ## Telas
 
-> Prints gerados pela versão web do app, em tamanho de celular e com dados de demonstração. Na web, o mapa é trocado pela lista. Serão substituídos por prints do app rodando no Expo Go.
+> Prints gerados pela versão web do app, em tamanho de celular e com dados de demonstração.
 
 | Entrar | Mapa | Ocorrência | Meu carro |
 |---|---|---|---|
@@ -240,7 +253,7 @@ O **risco estimado** (baixo, moderado ou elevado) aparece separado das ocorrênc
 
 ### Notificações
 
-O app usa notificações locais: consulta os dados a cada 10 segundos e avisa sozinho quando algo muda perto de um local do cidadão.
+O app usa notificações locais: consulta os dados a cada 10 segundos e avisa sozinho quando algo muda perto de um local do cidadão. Na versão web, usa as notificações do navegador.
 
 Notificações enviadas pelo servidor (push) não funcionam no Expo Go para Android desde o SDK 53. Por isso, nesta versão, os avisos só chegam com o app aberto. Ao voltar para o app, ele consulta os dados na hora.
 

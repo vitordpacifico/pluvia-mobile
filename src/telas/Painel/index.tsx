@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
@@ -12,6 +12,7 @@ import { EXPLICACAO_CONFIRMACAO_SENSOR, LIMIAR_ALAGAMENTO_CM } from '@/dominio/s
 import { estilosComuns } from '@/estilos/comuns';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 import { reiniciarSimulacao } from '@/servicos/dados/simulacao';
+import { pedirConfirmacao } from '@/utilitarios/confirmacao';
 import { formatarCm, formatarHaQuanto } from '@/utilitarios/formato';
 
 import { estilos } from './estilos';
@@ -55,18 +56,16 @@ export default function TelaPainel() {
   }
 
   function reiniciar() {
-    Alert.alert('Reiniciar a demonstração?', 'As chuvas e os encerramentos simulados voltam ao início.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Reiniciar',
-        style: 'destructive',
-        onPress: () => {
-          reiniciarSimulacao();
-          setMensagem('Demonstração reiniciada.');
-          recarregar();
-        },
+    pedirConfirmacao(
+      'Reiniciar a demonstração?',
+      'As chuvas e os encerramentos simulados voltam ao início.',
+      'Reiniciar',
+      () => {
+        reiniciarSimulacao();
+        setMensagem('Demonstração reiniciada.');
+        recarregar();
       },
-    ]);
+    );
   }
 
   return (

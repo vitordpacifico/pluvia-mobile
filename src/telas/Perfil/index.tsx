@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
 import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
@@ -17,6 +17,7 @@ import {
 } from '@/dominio/usuario';
 import { estilosComuns } from '@/estilos/comuns';
 import { notificacoesPermitidas, pedirPermissaoDeNotificacao } from '@/servicos/alertas/notificacoes';
+import { pedirConfirmacao } from '@/utilitarios/confirmacao';
 import { mascararCep, mascararTelefone } from '@/utilitarios/mascaras';
 import {
   semErros,
@@ -198,10 +199,9 @@ export default function TelaPerfil() {
   );
 
   const confirmarSaida = useCallback(() => {
-    Alert.alert('Sair da conta', 'Você deixará de receber avisos neste celular até entrar de novo.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: () => sair() },
-    ]);
+    pedirConfirmacao('Sair da conta', 'Você deixará de receber avisos neste aparelho até entrar de novo.', 'Sair', () => {
+      sair();
+    });
   }, [sair]);
 
   if (!usuario) return null;

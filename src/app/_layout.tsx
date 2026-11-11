@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { SplashScreen, Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { AutenticacaoProvider, useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { AvisosProvider } from '@/contexto/AvisosContext';
@@ -74,10 +75,30 @@ export default function LayoutRaiz() {
         <LocaisProvider>
           <AvisosProvider>
             <StatusBar style="light" />
-            <Navegacao />
+            {Platform.OS === 'web' ? (
+              <View style={estilos.fundoWeb}>
+                <View style={estilos.telaWeb}>
+                  <Navegacao />
+                </View>
+              </View>
+            ) : (
+              <Navegacao />
+            )}
           </AvisosProvider>
         </LocaisProvider>
       </DadosProvider>
     </AutenticacaoProvider>
   );
 }
+
+const estilos = StyleSheet.create({
+  fundoWeb: { flex: 1, alignItems: 'center', backgroundColor: '#DCE3F2' },
+  telaWeb: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 430,
+    overflow: 'hidden',
+    backgroundColor: cores.fundo,
+    boxShadow: '0 0 24px rgba(1, 42, 208, 0.18)',
+  },
+});

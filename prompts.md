@@ -95,6 +95,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Pedido de permissão de notificação ao entrar como cidadão, campos que não ficam escondidos pelo teclado no iPhone, limite de tempo e última posição conhecida no GPS, e tempo maior para os testes automáticos.
 
+### 13. Deixar a versão web pronta para gravar o vídeo (11/11/2026)
+
+**Pedido:** Preparar o aplicativo para rodar e gravar o vídeo no navegador do computador.
+
+**Resultado:** Mapa de verdade na web (Leaflet com OpenStreetMap), notificações do navegador, confirmação de "Sair da conta" e "Reiniciar a demonstração" que funciona na web e o app centralizado em tamanho de celular. Roteiro do vídeo com as instruções para gravar no computador.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.
@@ -114,7 +120,7 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 - Checagem de tipos (`tsc --noEmit`), lint (`expo lint`) e `expo-doctor` sem erros.
 - 156 testes automatizados passando.
-- Teste das telas e dos fluxos principais na versão web do aplicativo, com as duas contas.
+- Teste do roteiro inteiro na versão web do aplicativo, com as duas contas: mapa, foto, notificação, troca de conta, moderação e painel.
 - Compilação do aplicativo para Android e iOS.
 
 Ainda falta rodar o aplicativo no celular com o Expo Go. O mapa, a câmera, o GPS, as notificações e a vibração não podem ser testados no navegador.
