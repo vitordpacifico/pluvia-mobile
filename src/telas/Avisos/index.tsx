@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 
 import { Aviso as Mensagem } from '@/componentes/Aviso';
+import { EstadoVazio } from '@/componentes/EstadoVazio';
 import { Botao } from '@/componentes/Botao';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { useAvisos } from '@/contexto/AvisosContext';
@@ -20,6 +21,12 @@ const ICONE: Record<TipoAviso, 'water-alert' | 'check-circle-outline' | 'weather
   NOVO: 'water-alert',
   ENCERRADO: 'check-circle-outline',
   RISCO: 'weather-pouring',
+};
+
+const COR: Record<TipoAviso, { fundo: string; texto: string }> = {
+  NOVO: { fundo: cores.perigoSuave, texto: cores.erroTexto },
+  ENCERRADO: { fundo: cores.sucessoSuave, texto: cores.sucesso },
+  RISCO: { fundo: cores.avisoFundo, texto: cores.avisoTexto },
 };
 
 const ROTULO: Record<TipoAviso, string> = {
@@ -82,33 +89,43 @@ export default function TelaAvisos() {
         </View>
       }
       ListEmptyComponent={
-        <Text style={estilos.vazio}>
-          Nenhum aviso ainda. Salve o local do carro ou um lugar favorito para ser avisado de alagamentos por perto.
-        </Text>
+        <EstadoVazio
+          icone="bell-outline"
+          titulo="Nenhum aviso ainda"
+          texto="Salve o local do carro ou um lugar favorito para ser avisado de alagamentos por perto."
+        />
       }
       ItemSeparatorComponent={() => <View style={estilosComuns.separador} />}
-      renderItem={({ item }) => (
-        <Pressable
-          disabled={!item.ocorrenciaId}
-          onPress={() =>
-            item.ocorrenciaId && router.push({ pathname: '/ocorrencia/[id]', params: { id: item.ocorrenciaId } })
-          }
-          accessibilityRole={item.ocorrenciaId ? 'button' : 'text'}
-          accessibilityLabel={`${item.lidoEm ? '' : 'Não lido. '}${ROTULO[item.tipo]}. ${item.titulo}. ${item.texto}`}
-          style={[estilosComuns.cartao, !item.lidoEm && estilos.naoLido]}
-        >
-          <View style={estilos.topo}>
-            <MaterialCommunityIcons name={ICONE[item.tipo]} size={22} color={cores.primaria} />
-            <Text style={estilos.tipo}>{ROTULO[item.tipo]}</Text>
-          </View>
-          <Text style={estilos.titulo}>{item.titulo}</Text>
-          <Text style={estilos.texto}>{item.texto}</Text>
-          <Text style={estilos.detalhe}>
-            Recebido em {formatarDataHora(item.recebidoEm)}
-            {item.tipo === 'NOVO' ? `, ${formatarDuracao(tempoAteReceber(item))} depois do registro` : ''}
-          </Text>
-        </Pressable>
-      )}
+      renderItem={({ item }) => {
+        const cor = COR[item.tipo];
+        return (
+          <Pressable
+            disabled={!item.ocorrenciaId}
+            onPress={() =>
+              item.ocorrenciaId && router.push({ pathname: '/ocorrencia/[id]', params: { id: item.ocorrenciaId } })
+            }
+            accessibilityRole={item.ocorrenciaId ? 'button' : 'text'}
+            accessibilityLabel={`${item.lidoEm ? '' : 'Não lido. '}${ROTULO[item.tipo]}. ${item.titulo}. ${item.texto}`}
+            style={({ pressed }) => [estilosComuns.cartao, estilos.cartao, pressed && estilos.pressionado]}
+          >
+            <View style={[estilos.icone, { backgroundColor: cor.fundo }]}>
+              <MaterialCommunityIcons name={ICONE[item.tipo]} size={22} color={cor.texto} />
+            </View>
+            <View style={estilos.corpo}>
+              <View style={estilos.topo}>
+                <Text style={[estilos.tipo, { color: cor.texto }]}>{ROTULO[item.tipo]}</Text>
+                {!item.lidoEm && <View style={estilos.naoLido} />}
+              </View>
+              <Text style={estilos.titulo}>{item.titulo}</Text>
+              <Text style={estilos.texto}>{item.texto}</Text>
+              <Text style={estilos.detalhe}>
+                Recebido em {formatarDataHora(item.recebidoEm)}
+                {item.tipo === 'NOVO' ? `, ${formatarDuracao(tempoAteReceber(item))} depois do registro` : ''}
+              </Text>
+            </View>
+          </Pressable>
+        );
+      }}
     />
   );
 }

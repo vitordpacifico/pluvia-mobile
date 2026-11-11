@@ -13,12 +13,13 @@ interface Props<T extends string> {
   opcoes: Opcao<T>[];
   valor: T;
   onMudar: (valor: T) => void;
+  rotuloVisivel?: boolean;
 }
 
-export function GrupoOpcoes<T extends string>({ rotulo, opcoes, valor, onMudar }: Props<T>) {
+export function GrupoOpcoes<T extends string>({ rotulo, opcoes, valor, onMudar, rotuloVisivel = true }: Props<T>) {
   return (
     <View style={estilos.grupo}>
-      <Text style={estilos.rotulo}>{rotulo}</Text>
+      {rotuloVisivel && <Text style={estilos.rotulo}>{rotulo}</Text>}
       <View style={estilos.opcoes} accessibilityRole="radiogroup" accessibilityLabel={rotulo}>
         {opcoes.map((opcao) => {
           const marcada = opcao.valor === valor;

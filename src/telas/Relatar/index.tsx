@@ -1,3 +1,4 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
@@ -6,11 +7,14 @@ import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
 import { CaixaSelecao } from '@/componentes/CaixaSelecao';
 import { CampoTexto } from '@/componentes/CampoTexto';
+import { EstadoVazio } from '@/componentes/EstadoVazio';
+import { Etapa } from '@/componentes/Etapa';
 import { GrupoOpcoes } from '@/componentes/GrupoOpcoes';
 import { SeletorLocal, type LocalEscolhido } from '@/componentes/SeletorLocal';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
-import { INFO_STATUS_RELATO, OPCOES_TIPO_EVENTO, ROTULO_TIPO_EVENTO, type Relato, type TipoEvento } from '@/dominio/relato';
+import { INFO_STATUS_RELATO, OPCOES_TIPO_EVENTO, ROTULO_TIPO_EVENTO, type Relato, type StatusRelato, type TipoEvento } from '@/dominio/relato';
 import { estilosComuns } from '@/estilos/comuns';
+import { cores } from '@/estilos/tema';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 import { ErroFoto, escolherFoto, type OrigemFoto } from '@/servicos/dispositivo/fotos';
 import { formatarDataHora, formatarHoraCurta } from '@/utilitarios/formato';
@@ -26,6 +30,12 @@ import {
 } from '@/utilitarios/validacoes';
 
 import { estilos } from './estilos';
+
+const COR_STATUS: Record<StatusRelato, { fundo: string; texto: string }> = {
+  EM_ANALISE: { fundo: cores.avisoFundo, texto: cores.avisoTexto },
+  PUBLICADO: { fundo: cores.sucessoSuave, texto: cores.sucesso },
+  RECUSADO: { fundo: cores.erroFundo, texto: cores.erroTexto },
+};
 
 type Campo = 'local' | 'referencia' | 'hora' | 'descricao' | 'confirmacaoFoto' | 'seguranca';
 
@@ -143,41 +153,42 @@ export default function TelaRelatar() {
         texto="Fotografe só se estiver em segurança. Nunca entre na água para tirar a foto."
       />
 
-      <GrupoOpcoes rotulo="O que você viu?" opcoes={OPCOES_TIPO_EVENTO} valor={tipo} onMudar={setTipo} />
-      <SeletorLocal rotulo="Onde foi?" valor={local} onMudar={setLocal} erro={erros.local} />
-      <CampoTexto
-        rotulo="Rua ou ponto de referência"
-        valor={referencia}
-        onMudar={setReferencia}
-        erro={erros.referencia}
-        placeholder="Ex.: Rua dos Patriotas, perto da praça"
-        maxLength={80}
-      />
-      <CampoTexto
-        rotulo="Hora em que viu"
-        dica="Formato 24 horas, por exemplo 14:30"
-        valor={hora}
-        onMudar={setHora}
-        mascara={mascararHora}
-        erro={erros.hora}
-        keyboardType="number-pad"
-        maxLength={5}
-      />
-      <CampoTexto
-        rotulo={tipo === 'OUTRO' ? 'Descrição' : 'Descrição (opcional)'}
-        valor={descricao}
-        onMudar={setDescricao}
-        erro={erros.descricao}
-        dica={`Até ${TAMANHO_MAXIMO_DESCRICAO} caracteres. Não escreva placas nem nomes de pessoas.`}
-        multiline
-        maxLength={TAMANHO_MAXIMO_DESCRICAO}
-      />
+      <Etapa numero={1} titulo="O que você viu?">
+        <GrupoOpcoes
+          rotulo="O que você viu?"
+          rotuloVisivel={false}
+          opcoes={OPCOES_TIPO_EVENTO}
+          valor={tipo}
+          onMudar={setTipo}
+        />
+      </Etapa>
 
-      <View style={estilosComuns.cartao}>
-        <Text style={estilosComuns.tituloSecao}>Foto (opcional)</Text>
+      <Etapa numero={2} titulo="Onde e quando">
+        <SeletorLocal rotulo="Onde foi?" valor={local} onMudar={setLocal} erro={erros.local} />
+        <CampoTexto
+          rotulo="Rua ou ponto de referência"
+          valor={referencia}
+          onMudar={setReferencia}
+          erro={erros.referencia}
+          placeholder="Ex.: Rua dos Patriotas, perto da praça"
+          maxLength={80}
+        />
+        <CampoTexto
+          rotulo="Hora em que viu"
+          dica="Formato 24 horas, por exemplo 14:30"
+          valor={hora}
+          onMudar={setHora}
+          mascara={mascararHora}
+          erro={erros.hora}
+          keyboardType="number-pad"
+          maxLength={5}
+        />
+      </Etapa>
+
+      <Etapa numero={3} titulo="Foto e detalhes">
         <Text style={estilos.detalhe}>
-          A IA faz uma triagem da foto. Antes do envio, o app apaga a localização e os outros dados escondidos da
-          imagem.
+          Foto opcional. A IA faz uma triagem e, antes do envio, o app apaga a localização e os outros dados
+          escondidos da imagem.
         </Text>
         {foto ? (
           <>
@@ -191,50 +202,78 @@ export default function TelaRelatar() {
             />
           </>
         ) : (
-          <View style={estilos.botoes}>
-            <Botao rotulo="Tirar foto" icone="camera" variante="secundario" onPress={() => adicionarFoto('camera')} />
-            <Botao rotulo="Da galeria" icone="image" variante="secundario" onPress={() => adicionarFoto('galeria')} />
+          <View style={estilos.areaFoto}>
+            <MaterialCommunityIcons name="camera-plus-outline" size={34} color={cores.primaria} />
+            <View style={estilos.botoes}>
+              <Botao rotulo="Tirar foto" icone="camera" variante="secundario" onPress={() => adicionarFoto('camera')} />
+              <Botao rotulo="Da galeria" icone="image" variante="secundario" onPress={() => adicionarFoto('galeria')} />
+            </View>
           </View>
         )}
-      </View>
+        <CampoTexto
+          rotulo={tipo === 'OUTRO' ? 'Descrição' : 'Descrição (opcional)'}
+          valor={descricao}
+          onMudar={setDescricao}
+          erro={erros.descricao}
+          dica={`Até ${TAMANHO_MAXIMO_DESCRICAO} caracteres. Não escreva placas nem nomes de pessoas.`}
+          multiline
+          maxLength={TAMANHO_MAXIMO_DESCRICAO}
+        />
+      </Etapa>
 
-      <CaixaSelecao
-        texto="Estou em um lugar seguro"
-        marcada={seguranca}
-        onMudar={setSeguranca}
-        erro={erros.seguranca}
-      />
-      {erroGeral && <Aviso tipo="erro" texto={erroGeral} />}
-      <Botao
-        rotulo={enviando ? 'Enviando e analisando…' : 'Enviar relato'}
-        icone="send"
-        ocupado={enviando}
-        onPress={enviar}
-      />
-      <Text style={estilos.detalhe}>
-        O relato fica em análise até a equipe conferir. Se for publicado, aparece no mapa como relato comunitário,
-        nunca como registro oficial.
-      </Text>
+      <Etapa numero={4} titulo="Enviar">
+        <CaixaSelecao
+          texto="Estou em um lugar seguro"
+          marcada={seguranca}
+          onMudar={setSeguranca}
+          erro={erros.seguranca}
+        />
+        {erroGeral && <Aviso tipo="erro" texto={erroGeral} />}
+        <Botao
+          rotulo={enviando ? 'Enviando e analisando…' : 'Enviar relato'}
+          icone="send"
+          ocupado={enviando}
+          onPress={enviar}
+        />
+        <Text style={estilos.detalhe}>
+          O relato fica em análise até a equipe conferir. Se for publicado, aparece no mapa como relato comunitário,
+          nunca como registro oficial.
+        </Text>
+      </Etapa>
 
       <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
         Meus relatos ({meus.length})
       </Text>
-      {meus.length === 0 && <Text style={estilos.detalhe}>Você ainda não enviou relatos.</Text>}
-      {meus.map((relato) => (
-        <Pressable
-          key={relato.id}
-          onPress={() => router.push({ pathname: '/relato/[id]', params: { id: relato.id } })}
-          accessibilityRole="button"
-          accessibilityLabel={`${ROTULO_TIPO_EVENTO[relato.tipo]} em ${relato.bairro}, ${INFO_STATUS_RELATO[relato.status].rotulo}`}
-          style={({ pressed }) => [estilosComuns.cartao, pressed && estilos.pressionado]}
-        >
-          <Text style={estilos.relatoTitulo}>
-            {ROTULO_TIPO_EVENTO[relato.tipo]} · {relato.bairro}
-          </Text>
-          <Text style={estilos.status}>{INFO_STATUS_RELATO[relato.status].rotulo}</Text>
-          <Text style={estilos.detalhe}>Enviado em {formatarDataHora(relato.enviadoEm)}</Text>
-        </Pressable>
-      ))}
+      {meus.length === 0 && (
+        <EstadoVazio
+          icone="camera-outline"
+          titulo="Nenhum relato ainda"
+          texto="Quando você enviar um relato, ele aparece aqui com a situação da análise."
+        />
+      )}
+      {meus.map((relato) => {
+        const cor = COR_STATUS[relato.status];
+        return (
+          <Pressable
+            key={relato.id}
+            onPress={() => router.push({ pathname: '/relato/[id]', params: { id: relato.id } })}
+            accessibilityRole="button"
+            accessibilityLabel={`${ROTULO_TIPO_EVENTO[relato.tipo]} em ${relato.bairro}, ${INFO_STATUS_RELATO[relato.status].rotulo}`}
+            style={({ pressed }) => [estilosComuns.cartao, estilos.relato, pressed && estilos.pressionado]}
+          >
+            <View style={estilos.relatoCorpo}>
+              <Text style={estilos.relatoTitulo}>
+                {ROTULO_TIPO_EVENTO[relato.tipo]} · {relato.bairro}
+              </Text>
+              <View style={[estilos.chipStatus, { backgroundColor: cor.fundo }]}>
+                <Text style={[estilos.status, { color: cor.texto }]}>{INFO_STATUS_RELATO[relato.status].rotulo}</Text>
+              </View>
+              <Text style={estilos.detalhe}>Enviado em {formatarDataHora(relato.enviadoEm)}</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={cores.textoSecundario} />
+          </Pressable>
+        );
+      })}
     </ScrollView>
   );
 }

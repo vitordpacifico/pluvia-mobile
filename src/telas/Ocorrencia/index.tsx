@@ -1,5 +1,6 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Aviso } from '@/componentes/Aviso';
@@ -21,11 +22,28 @@ import {
 import { EXPLICACAO_CONFIRMACAO_SENSOR } from '@/dominio/sensor';
 import { ehAgente, ehCidadao } from '@/dominio/usuario';
 import { estilosComuns } from '@/estilos/comuns';
+import { cores } from '@/estilos/tema';
 import { pedirPermissaoDeNotificacao } from '@/servicos/alertas/notificacoes';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 import { formatarCm, formatarDataHora, formatarHaQuanto, formatarHoraCurta } from '@/utilitarios/formato';
 
 import { estilos } from './estilos';
+
+type NomeIcone = ComponentProps<typeof MaterialCommunityIcons>['name'];
+
+function LinhaInfo({ icone, rotulo, valor }: { icone: NomeIcone; rotulo: string; valor: string }) {
+  return (
+    <View style={estilos.linhaInfo} accessible accessibilityLabel={`${rotulo}: ${valor}`}>
+      <View style={estilos.iconeInfo}>
+        <MaterialCommunityIcons name={icone} size={18} color={cores.primaria} />
+      </View>
+      <View style={estilos.textoInfo}>
+        <Text style={estilos.rotuloInfo}>{rotulo}</Text>
+        <Text style={estilos.valorInfo}>{valor}</Text>
+      </View>
+    </View>
+  );
+}
 
 export default function TelaOcorrencia() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -99,18 +117,25 @@ export default function TelaOcorrencia() {
     <ScrollView style={estilosComuns.tela} contentContainerStyle={estilosComuns.conteudo}>
       <Stack.Screen options={{ title: ocorrencia.titulo }} />
 
-      <View style={estilosComuns.cartao}>
+      <View style={[estilosComuns.cartao, estilos.principal]}>
+        <View style={[estilos.faixaEstado, { backgroundColor: info.corFundo }]} />
         <SeloEstado estado={estado} grande />
         <Text style={estilosComuns.titulo} accessibilityRole="header">
           {ocorrencia.titulo}
         </Text>
-        <Text style={estilos.endereco}>
-          {ocorrencia.referencia} · {ocorrencia.bairro}
-        </Text>
-        {carro && (
-          <Text style={estilos.distancia}>
-            A {formatarDistancia(distanciaMetros(carro.local, ocorrencia.local))} do seu carro
+        <View style={estilos.linhaLocal}>
+          <MaterialCommunityIcons name="map-marker-outline" size={18} color={cores.textoSecundario} />
+          <Text style={estilos.endereco}>
+            {ocorrencia.referencia} · {ocorrencia.bairro}
           </Text>
+        </View>
+        {carro && (
+          <View style={estilos.chipDistancia}>
+            <MaterialCommunityIcons name="car" size={16} color={cores.primaria} />
+            <Text style={estilos.distancia}>
+              A {formatarDistancia(distanciaMetros(carro.local, ocorrencia.local))} do seu carro
+            </Text>
+          </View>
         )}
         <Text style={estilos.explicacao}>{info.explicacao}</Text>
         {encerramento && <Aviso tipo="sucesso" texto={encerramento} />}
@@ -120,17 +145,19 @@ export default function TelaOcorrencia() {
         <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
           De onde vem a informação
         </Text>
-        <Text style={estilosComuns.texto}>
-          {ROTULO_FONTE[ocorrencia.fonte.tipo]}: {ocorrencia.fonte.nome}
-        </Text>
-        <Text style={estilos.dado}>Registrada em {formatarDataHora(ocorrencia.registradaEm)}</Text>
-        <Text style={estilos.dado}>
-          Última atualização {formatarHaQuanto(ocorrencia.atualizadaEm)} ({formatarDataHora(ocorrencia.atualizadaEm)})
-        </Text>
+        <LinhaInfo icone="domain" rotulo={ROTULO_FONTE[ocorrencia.fonte.tipo]} valor={ocorrencia.fonte.nome} />
+        <LinhaInfo icone="clock-start" rotulo="Registrada em" valor={formatarDataHora(ocorrencia.registradaEm)} />
+        <LinhaInfo
+          icone="update"
+          rotulo="Última atualização"
+          valor={`${formatarHaQuanto(ocorrencia.atualizadaEm)} (${formatarDataHora(ocorrencia.atualizadaEm)})`}
+        />
         {ocorrencia.nivelCm !== undefined && (
-          <Text style={estilos.dado}>
-            {ocorrencia.status === 'ATIVO' ? 'Nível medido agora' : 'Nível máximo medido'}: {formatarCm(ocorrencia.nivelCm)}
-          </Text>
+          <LinhaInfo
+            icone="waves"
+            rotulo={ocorrencia.status === 'ATIVO' ? 'Nível medido agora' : 'Nível máximo medido'}
+            valor={formatarCm(ocorrencia.nivelCm)}
+          />
         )}
       </View>
 
@@ -148,14 +175,26 @@ export default function TelaOcorrencia() {
         <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
           Histórico
         </Text>
-        {ocorrencia.historico.map((mudanca) => (
-          <View key={`${mudanca.status}-${mudanca.em}`} style={estilos.mudanca} accessible>
-            <Text style={estilos.mudancaHora}>{formatarDataHora(mudanca.em)}</Text>
-            <Text style={estilos.mudancaTexto}>
-              {mudanca.status === 'ATIVO' ? 'Ativo' : 'Encerrado'}: {mudanca.descricao}
-            </Text>
-          </View>
-        ))}
+        <View>
+          {ocorrencia.historico.map((mudanca, indice) => {
+            const ultimo = indice === ocorrencia.historico.length - 1;
+            const ativo = mudanca.status === 'ATIVO';
+            return (
+              <View key={`${mudanca.status}-${mudanca.em}`} style={estilos.mudanca} accessible>
+                <View style={estilos.trilho}>
+                  <View style={[estilos.bolinha, ativo ? estilos.bolinhaAtiva : estilos.bolinhaEncerrada]} />
+                  {!ultimo && <View style={estilos.linhaTempo} />}
+                </View>
+                <View style={estilos.mudancaCorpo}>
+                  <Text style={estilos.mudancaHora}>
+                    {ativo ? 'Ativo' : 'Encerrado'} · {formatarDataHora(mudanca.em)}
+                  </Text>
+                  <Text style={estilos.mudancaTexto}>{mudanca.descricao}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
       </View>
 
       {mensagem && <Aviso tipo={mensagem.tipo} texto={mensagem.texto} />}

@@ -29,6 +29,13 @@ import {
 
 import { estilos } from './estilos';
 
+function iniciais(nome: string): string {
+  const partes = nome.trim().split(/\s+/).filter(Boolean);
+  const primeira = partes[0]?.[0] ?? '';
+  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+  return (primeira + ultima).toUpperCase();
+}
+
 function Dado({ rotulo, valor }: { rotulo: string; valor: string }) {
   return (
     <View style={estilos.dado} accessible accessibilityLabel={`${rotulo}: ${valor}`}>
@@ -214,13 +221,20 @@ export default function TelaPerfil() {
       <ScrollView contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
         {erro && <Aviso tipo="erro" texto={erro} />}
 
-        <View style={estilosComuns.cartao}>
-          <Text style={estilosComuns.titulo} accessibilityRole="header">
-            {usuario.nome}
-          </Text>
-          <Dado rotulo="Perfil" valor={ROTULO_PERFIL[usuario.perfil]} />
-          {usuario.orgao && <Dado rotulo="Órgão" valor={usuario.orgao} />}
-          {!cidadao && <Dado rotulo="E-mail" valor={usuario.email} />}
+        <View style={[estilosComuns.cartao, estilos.cabecalho]}>
+          <View style={estilos.avatar} accessibilityElementsHidden importantForAccessibility="no">
+            <Text style={estilos.iniciais}>{iniciais(usuario.nome)}</Text>
+          </View>
+          <View style={estilos.identidade}>
+            <Text style={estilos.nome} accessibilityRole="header">
+              {usuario.nome}
+            </Text>
+            <View style={estilos.chipPerfil}>
+              <Text style={estilos.textoPerfil}>{ROTULO_PERFIL[usuario.perfil]}</Text>
+            </View>
+            {usuario.orgao && <Dado rotulo="Órgão" valor={usuario.orgao} />}
+            {!cidadao && <Dado rotulo="E-mail" valor={usuario.email} />}
+          </View>
         </View>
 
         {cidadao && <EditarCidadao usuario={usuario} />}

@@ -4,7 +4,7 @@ import { Pressable, Text, TextInput, View, type TextInputProps } from 'react-nat
 
 import { cores } from '@/estilos/tema';
 
-import { estilos } from './estilos';
+import { estilos, semContornoWeb } from './estilos';
 
 interface Props extends Omit<TextInputProps, 'value' | 'onChangeText' | 'style'> {
   rotulo: string;
@@ -56,7 +56,7 @@ export function CampoTexto({
           accessibilityLabelledBy={idRotulo}
           accessibilityHint={descricao || undefined}
           accessibilityState={{ disabled: entrada.editable === false }}
-          style={estilos.entrada}
+          style={[estilos.entrada, semContornoWeb]}
         />
         {senha && (
           <Pressable

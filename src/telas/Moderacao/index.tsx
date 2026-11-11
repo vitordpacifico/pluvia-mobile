@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { FlatList, Image, Pressable, Text, View } from 'react-native';
 
 import { Aviso } from '@/componentes/Aviso';
+import { EstadoVazio } from '@/componentes/EstadoVazio';
 import { INFO_TRIAGEM, ROTULO_TIPO_EVENTO, type Relato } from '@/dominio/relato';
 import { estilosComuns } from '@/estilos/comuns';
 import { fonteDeDados } from '@/servicos/dados/fonte';
@@ -44,7 +45,13 @@ export default function TelaModeracao() {
           {erro && <Aviso tipo="erro" texto={erro} />}
         </View>
       }
-      ListEmptyComponent={<Text style={estilos.detalhe}>Nenhum relato esperando análise.</Text>}
+      ListEmptyComponent={
+        <EstadoVazio
+          icone="check-decagram-outline"
+          titulo="Tudo em dia"
+          texto="Nenhum relato esperando análise."
+        />
+      }
       ItemSeparatorComponent={() => <View style={estilosComuns.separador} />}
       renderItem={({ item }) => (
         <Pressable

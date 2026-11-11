@@ -118,9 +118,13 @@ Também é possível criar uma conta de cidadão em **Criar conta**. A equipe n�
 |---|---|---|---|
 | ![Tela Entrar](docs/prints/01-entrar.png) | ![Tela Mapa](docs/prints/02-mapa.png) | ![Tela Ocorrência](docs/prints/03-ocorrencia.png) | ![Tela Meu carro](docs/prints/04-carro.png) |
 
-| Relatar | Resultado da IA | Moderação | Painel da equipe |
+| Relatar | Resultado da IA | Avisos | Perfil |
 |---|---|---|---|
-| ![Tela Relatar](docs/prints/05-relatar.png) | ![Tela Relato](docs/prints/06-relato.png) | ![Tela Moderação](docs/prints/08-moderacao.png) | ![Tela Painel](docs/prints/10-painel.png) |
+| ![Tela Relatar](docs/prints/05-relatar.png) | ![Tela Relato](docs/prints/06-relato.png) | ![Tela Avisos](docs/prints/07-avisos.png) | ![Tela Perfil](docs/prints/08-perfil.png) |
+
+| Moderação | Checagem do contexto | Painel da equipe |
+|---|---|---|
+| ![Tela Moderação](docs/prints/09-moderacao.png) | ![Checagem do contexto](docs/prints/10-checagem.png) | ![Tela Painel](docs/prints/11-painel.png) |
 
 | Tela | Perfil | O que faz |
 |---|---|---|

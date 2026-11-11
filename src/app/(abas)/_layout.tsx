@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router/js-tabs';
 import type { ComponentProps } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { Marca } from '@/componentes/Marca';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
@@ -10,14 +11,17 @@ import { cores } from '@/estilos/tema';
 
 type NomeIcone = ComponentProps<typeof MaterialCommunityIcons>['name'];
 
+const estilos = StyleSheet.create({
+  icone: { width: 52, height: 30, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  iconeAtivo: { backgroundColor: cores.primariaSuave },
+});
+
 function icone(nome: NomeIcone) {
-  return function Icone({ focused, size }: { focused: boolean; size: number }) {
+  return function Icone({ focused }: { focused: boolean; size: number }) {
     return (
-      <MaterialCommunityIcons
-        name={nome}
-        color={focused ? cores.primaria : cores.textoSecundario}
-        size={size}
-      />
+      <View style={[estilos.icone, focused && estilos.iconeAtivo]}>
+        <MaterialCommunityIcons name={nome} color={focused ? cores.primaria : cores.textoSecundario} size={22} />
+      </View>
     );
   };
 }

@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet, type TextStyle } from 'react-native';
 
 import { ALVO_MINIMO_TOQUE, cores, raio } from '@/estilos/tema';
 
@@ -22,7 +22,6 @@ export const estilos = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     color: cores.texto,
-    outlineWidth: 0,
   },
   botaoMostrar: {
     minWidth: ALVO_MINIMO_TOQUE,
@@ -32,3 +31,5 @@ export const estilos = StyleSheet.create({
   },
   erro: { fontSize: 14, color: cores.perigo, fontWeight: '600' },
 });
+
+export const semContornoWeb = (Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) as TextStyle;
