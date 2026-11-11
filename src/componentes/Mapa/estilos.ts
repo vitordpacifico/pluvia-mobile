@@ -19,12 +19,10 @@ export const COR_PINO: Record<EstadoExibido, string> = {
 
 export const estilos = StyleSheet.create({
   moldura: {
-    height: 320,
-    borderRadius: raio.g,
+    height: 300,
+    borderRadius: raio.g - 6,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: cores.borda,
-    backgroundColor: cores.superficie,
+    backgroundColor: cores.superficieSuave,
   },
   mapa: { flex: 1 },
   marcadorLocal: {

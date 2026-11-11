@@ -28,6 +28,7 @@ export function CampoTexto({
 }: Props) {
   const idRotulo = useId();
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [focado, setFocado] = useState(false);
   const descricao = [dica, erro].filter(Boolean).join('. ');
 
   return (
@@ -36,9 +37,17 @@ export function CampoTexto({
         {rotulo}
       </Text>
       {dica && <Text style={estilos.dica}>{dica}</Text>}
-      <View style={estilos.linhaEntrada}>
+      <View style={[estilos.linhaEntrada, focado && estilos.linhaFocada, erro && estilos.linhaComErro]}>
         <TextInput
           {...entrada}
+          onFocus={(evento) => {
+            setFocado(true);
+            entrada.onFocus?.(evento);
+          }}
+          onBlur={(evento) => {
+            setFocado(false);
+            entrada.onBlur?.(evento);
+          }}
           value={valor}
           onChangeText={(texto) => onMudar(mascara ? mascara(texto) : texto)}
           secureTextEntry={senha && !mostrarSenha}
@@ -47,7 +56,7 @@ export function CampoTexto({
           accessibilityLabelledBy={idRotulo}
           accessibilityHint={descricao || undefined}
           accessibilityState={{ disabled: entrada.editable === false }}
-          style={[estilos.entrada, erro && estilos.entradaComErro]}
+          style={estilos.entrada}
         />
         {senha && (
           <Pressable

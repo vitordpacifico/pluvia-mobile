@@ -40,6 +40,7 @@ function Navegacao() {
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: cores.primaria },
+        headerShadowVisible: false,
         headerTintColor: cores.textoSobrePrimaria,
         headerTitleStyle: { fontWeight: '700' },
         headerBackButtonDisplayMode: 'minimal',

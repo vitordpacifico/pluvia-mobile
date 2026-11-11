@@ -86,18 +86,6 @@ export default function TelaCadastro() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
-        <View style={estilosComuns.cartao}>
-          <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-            O que o mapa mostra
-          </Text>
-          {ESTADOS.map((estado) => (
-            <View key={estado} style={estilos.estado}>
-              <SeloEstado estado={estado} />
-              <Text style={estilosComuns.legenda}>{INFO_ESTADO[estado].explicacao}</Text>
-            </View>
-          ))}
-        </View>
-
         <View style={[estilosComuns.cartao, estilos.formulario]}>
           <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
             Seus dados
@@ -177,6 +165,17 @@ export default function TelaCadastro() {
           <Text style={estilosComuns.legenda}>
             Ao criar a conta, vamos pedir permissão para enviar notificações. Localização e câmera só são pedidas quando você usar.
           </Text>
+        </View>
+        <View style={estilosComuns.cartao}>
+          <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
+            O que o mapa mostra
+          </Text>
+          {ESTADOS.map((estado) => (
+            <View key={estado} style={estilos.estado}>
+              <SeloEstado estado={estado} />
+              <Text style={estilosComuns.legenda}>{INFO_ESTADO[estado].explicacao}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

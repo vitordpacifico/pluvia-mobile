@@ -1,14 +1,13 @@
 import { Image } from 'react-native';
 
-import { estilos } from './estilos';
+const LOGO = require('../../../assets/logo-pluvia-transparente.png');
+const PROPORCAO = 357 / 657;
 
-const LOGO = require('../../../assets/logo-pluvia.png');
-
-export function Marca() {
+export function Marca({ largura = 220 }: { largura?: number }) {
   return (
     <Image
       source={LOGO}
-      style={estilos.logo}
+      style={{ width: largura, height: Math.round(largura * PROPORCAO) }}
       resizeMode="contain"
       accessible
       accessibilityRole="header"

@@ -2,6 +2,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router/js-tabs';
 import type { ComponentProps } from 'react';
 
+import { Marca } from '@/componentes/Marca';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { useAvisos } from '@/contexto/AvisosContext';
 import { ehAgente, ehCidadao } from '@/dominio/usuario';
@@ -30,12 +31,21 @@ export default function LayoutAbas() {
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: cores.primaria },
+        headerShadowVisible: false,
         headerTintColor: cores.textoSobrePrimaria,
-        headerTitleStyle: { fontWeight: '700' },
-        headerTitle: 'Pluvia',
+        headerTitleAlign: 'left',
+        headerTitle: () => <Marca largura={84} />,
         tabBarActiveTintColor: cores.primaria,
         tabBarInactiveTintColor: cores.textoSecundario,
-        tabBarLabelStyle: { fontWeight: '600' },
+        tabBarLabelStyle: { fontWeight: '700', fontSize: 11 },
+        tabBarStyle: {
+          height: 66,
+          paddingTop: 6,
+          paddingBottom: 8,
+          borderTopWidth: 0,
+          backgroundColor: cores.superficie,
+          boxShadow: '0 -4px 16px rgba(17, 24, 39, 0.06)',
+        },
         sceneStyle: { backgroundColor: cores.fundo },
       }}
     >

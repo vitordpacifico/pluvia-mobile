@@ -1,3 +1,4 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
@@ -15,6 +16,7 @@ import { distanciaMetros, formatarDistancia, type Coordenada, type RaioMonitoram
 import { AVISO_SEGURANCA, semDadosRecentes } from '@/dominio/ocorrencia';
 import { AVISO_INCERTEZA, riscoNoPonto } from '@/dominio/riscoEstimado';
 import { estilosComuns } from '@/estilos/comuns';
+import { cores } from '@/estilos/tema';
 import { pedirPermissaoDeNotificacao } from '@/servicos/alertas/notificacoes';
 import { semErros, validarReferencia, type Validacao } from '@/utilitarios/validacoes';
 
@@ -129,11 +131,22 @@ export default function TelaMeuCarro() {
 
       {carro && !editando && situacao && (
         <View style={estilosComuns.cartao}>
-          <Text style={estilosComuns.tituloSecao}>Seu carro está em</Text>
-          <Text style={estilos.local}>
-            {carro.referencia} · {carro.bairro}
-          </Text>
-          <Text style={estilos.detalhe}>Você é avisado num raio de {formatarDistancia(carro.raioM)}.</Text>
+          <View style={estilos.topoCarro}>
+            <View style={[estilos.iconeCarro, situacao.ativas.length > 0 && estilos.iconeCarroAlerta]}>
+              <MaterialCommunityIcons
+                name="car"
+                size={28}
+                color={situacao.ativas.length > 0 ? cores.perigo : cores.sucesso}
+              />
+            </View>
+            <View style={estilos.textoCarro}>
+              <Text style={estilos.rotuloCarro}>Seu carro está em</Text>
+              <Text style={estilos.local}>
+                {carro.referencia} · {carro.bairro}
+              </Text>
+              <Text style={estilos.detalhe}>Você é avisado num raio de {formatarDistancia(carro.raioM)}.</Text>
+            </View>
+          </View>
           {situacao.ativas.length === 0 ? (
             <Aviso
               tipo="info"

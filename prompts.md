@@ -101,6 +101,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Mapa de verdade na web (Leaflet com OpenStreetMap), notificações do navegador, confirmação de "Sair da conta" e "Reiniciar a demonstração" que funciona na web e o app centralizado em tamanho de celular. Roteiro do vídeo com as instruções para gravar no computador.
 
+### 14. Melhorar o visual do aplicativo (11/11/2026)
+
+**Pedido:** Melhorar o visual, que estava feio, incluindo o logotipo da tela de entrar, que parecia uma imagem colada.
+
+**Resultado:** Tema novo com sombras no lugar das bordas, cantos arredondados e tons claros da cor da marca. Botões, campos, opções e filtros redesenhados. Logotipo sem fundo no topo azul da tela de entrar e no cabeçalho. Tela do mapa com o mapa em primeiro lugar, resumo e legenda juntos e riscos estimados em cartões laterais. Cartões novos para ocorrências, carro e painel da equipe. Contraste mínimo de 7:1 conferido de novo.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.

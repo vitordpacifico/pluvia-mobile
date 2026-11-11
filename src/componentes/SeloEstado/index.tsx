@@ -19,7 +19,7 @@ export function SeloEstado({ estado, grande = false }: Props) {
       accessible
       accessibilityLabel={`Situação: ${info.rotulo}`}
     >
-      <MaterialCommunityIcons name={info.icone} size={grande ? 26 : 18} color={info.corTexto} />
+      <MaterialCommunityIcons name={info.icone} size={grande ? 22 : 16} color={info.corTexto} />
       <Text style={[estilos.texto, grande && estilos.textoGrande, { color: info.corTexto }]}>
         {info.rotulo}
       </Text>
@@ -31,7 +31,7 @@ export function SeloFaixa({ faixa }: { faixa: FaixaRisco }) {
   const info = INFO_FAIXA[faixa];
   return (
     <View style={[estilos.selo, { backgroundColor: info.corFundo }]} accessible accessibilityLabel={info.rotulo}>
-      <MaterialCommunityIcons name="weather-pouring" size={18} color={info.corTexto} />
+      <MaterialCommunityIcons name="weather-pouring" size={16} color={info.corTexto} />
       <Text style={[estilos.texto, { color: info.corTexto }]}>{info.rotulo}</Text>
     </View>
   );

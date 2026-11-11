@@ -54,21 +54,26 @@ export default function TelaEntrar() {
   }
 
   return (
-    <SafeAreaView style={estilosComuns.tela}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <KeyboardAvoidingView
         style={estilosComuns.tela}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={estilosComuns.conteudo} keyboardShouldPersistTaps="handled">
-          <View style={estilos.marca}>
-            <Marca />
+        <ScrollView
+          style={estilos.rolagem}
+          contentContainerStyle={estilos.conteudo}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
+          <View style={estilos.topo}>
+            <Marca largura={230} />
             <Text style={estilos.slogan}>
               Alagamentos perto de você, do seu carro e dos seus trajetos, com a fonte e a hora de cada
               informação.
             </Text>
           </View>
 
-          <View style={estilosComuns.cartao}>
+          <View style={[estilosComuns.cartao, estilos.cartaoLogin]}>
             <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
               Entrar
             </Text>
@@ -105,7 +110,7 @@ export default function TelaEntrar() {
           </View>
 
           {fonteDeDados.simulada && (
-            <View style={estilosComuns.cartao}>
+            <View style={[estilosComuns.cartao, estilos.cartaoDemo]}>
               <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
                 Contas de demonstração
               </Text>
@@ -130,7 +135,7 @@ export default function TelaEntrar() {
             </View>
           )}
 
-          <Text style={estilosComuns.rodape}>
+          <Text style={[estilosComuns.rodape, estilos.rodape]}>
             O Pluvia não substitui os comunicados oficiais. Em emergência, ligue 199 ou 193.
           </Text>
         </ScrollView>

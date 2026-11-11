@@ -19,7 +19,7 @@ export interface PropsMapa {
   onSelecionar: (ocorrencia: Ocorrencia) => void;
 }
 
-const DELTA = { latitudeDelta: 0.05, longitudeDelta: 0.05 };
+const DELTA = { latitudeDelta: 0.06, longitudeDelta: 0.06 };
 
 export function Mapa({ centro, ocorrencias, riscos, locais, onSelecionar }: PropsMapa) {
   const mapa = useRef<MapView>(null);

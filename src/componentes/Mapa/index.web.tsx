@@ -31,7 +31,7 @@ const PAGINA = `<!doctype html>
 <div id="mapa"></div>
 <script src="${LEAFLET}/leaflet.js"></script>
 <script>
-  const mapa = L.map('mapa', { zoomControl: true }).setView([-23.57, -46.61], 14);
+  const mapa = L.map('mapa', { zoomControl: true }).setView([-23.57, -46.61], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap',
@@ -48,7 +48,7 @@ const PAGINA = `<!doctype html>
     const centro = dados.centro.lat + ',' + dados.centro.lng;
     if (centro !== centroAtual) {
       centroAtual = centro;
-      mapa.setView([dados.centro.lat, dados.centro.lng], 14);
+      mapa.setView([dados.centro.lat, dados.centro.lng], 13);
     }
     const chave = JSON.stringify([dados.riscos, dados.locais, dados.ocorrencias]);
     if (chave === ultimosDados) return;

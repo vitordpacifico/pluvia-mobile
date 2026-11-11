@@ -1,3 +1,4 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
@@ -82,12 +83,15 @@ export default function TelaPainel() {
           return (
             <View
               key={estado}
-              style={[estilos.contador, { backgroundColor: info.corFundo }]}
+              style={estilos.contador}
               accessible
               accessibilityLabel={`${quantidade} ocorrência(s): ${info.rotulo}`}
             >
-              <Text style={[estilos.numero, { color: info.corTexto }]}>{quantidade}</Text>
-              <Text style={[estilos.rotuloContador, { color: info.corTexto }]}>{info.rotulo}</Text>
+              <View style={[estilos.iconeContador, { backgroundColor: info.corFundo }]}>
+                <MaterialCommunityIcons name={info.icone} size={20} color={info.corTexto} />
+              </View>
+              <Text style={estilos.numero}>{quantidade}</Text>
+              <Text style={estilos.rotuloContador}>{info.rotulo}</Text>
             </View>
           );
         })}

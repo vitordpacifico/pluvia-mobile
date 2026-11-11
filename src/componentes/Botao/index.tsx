@@ -21,7 +21,7 @@ interface Props {
 const COR_TEXTO: Record<Variante, string> = {
   primario: cores.textoSobrePrimaria,
   secundario: cores.primaria,
-  perigo: cores.perigo,
+  perigo: cores.erroTexto,
   link: cores.primaria,
 };
 
