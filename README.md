@@ -1,7 +1,5 @@
 # Pluvia: alagamentos perto de você
 
-[![Verificações](https://github.com/vitordpacifico/pluvia-mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/vitordpacifico/pluvia-mobile/actions/workflows/ci.yml)
-
 Entrega de **Mobile Development & IoT** da Global Solution 2026.2 (FIAP, Engenharia de Software, 3º ano), tema CitizenTech.
 
 O Pluvia é um app em React Native (Expo) que:
@@ -161,7 +159,7 @@ src/
   app/                 Rotas do Expo Router. Cada arquivo só aponta para uma tela.
   telas/               Telas: index.tsx (lógica e layout) + estilos.ts
   componentes/         Componentes reutilizáveis: index.tsx + estilos.ts
-                       (o Mapa tem uma versão para web, que mostra a lista)
+                       (o Mapa tem uma versão para web, com o OpenStreetMap)
   contexto/            Context API: autenticação, dados do mapa, locais e avisos
   servicos/
     armazenamento/     AsyncStorage (contas, sessão, avisos, cópia offline)
@@ -247,7 +245,7 @@ O **risco estimado** (baixo, moderado ou elevado) aparece separado das ocorrênc
 - **Localização por escolha:** o GPS só é pedido quando a pessoa toca em "Usar minha localização". Tudo funciona escolhendo o bairro.
 - **LGPD:** o autor pode excluir um relato, e a exclusão de conta pede a senha e apaga a conta, o cofre, os avisos e os relatos da pessoa.
 - **Comunicação de emergência:** o app nunca diz que uma rua está liberada e lembra de não atravessar água, com os telefones 199 e 193.
-- **Limite conhecido:** o login é local porque a API ainda não existe. Em produção, a autenticação ficaria no servidor, com bcrypt ou Argon2. A versão web, usada só nos prints, não tem cofre e guarda no armazenamento do navegador.
+- **Limite conhecido:** o login é local porque a API ainda não existe. Em produção, a autenticação ficaria no servidor, com bcrypt ou Argon2. A versão web, usada nos prints e no vídeo, não tem cofre e guarda no armazenamento do navegador.
 
 ### Inteligência artificial
 
