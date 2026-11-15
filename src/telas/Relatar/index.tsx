@@ -11,8 +11,9 @@ import { EstadoVazio } from '@/componentes/EstadoVazio';
 import { Etapa } from '@/componentes/Etapa';
 import { GrupoOpcoes } from '@/componentes/GrupoOpcoes';
 import { SeletorLocal, type LocalEscolhido } from '@/componentes/SeletorLocal';
+import { SeloRelato } from '@/componentes/SeloEstado';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
-import { INFO_STATUS_RELATO, OPCOES_TIPO_EVENTO, ROTULO_TIPO_EVENTO, type Relato, type StatusRelato, type TipoEvento } from '@/dominio/relato';
+import { INFO_STATUS_RELATO, OPCOES_TIPO_EVENTO, ROTULO_TIPO_EVENTO, type Relato, type TipoEvento } from '@/dominio/relato';
 import { estilosComuns } from '@/estilos/comuns';
 import { cores } from '@/estilos/tema';
 import { fonteDeDados } from '@/servicos/dados/fonte';
@@ -31,11 +32,6 @@ import {
 
 import { estilos } from './estilos';
 
-const COR_STATUS: Record<StatusRelato, { fundo: string; texto: string }> = {
-  EM_ANALISE: { fundo: cores.avisoFundo, texto: cores.avisoTexto },
-  PUBLICADO: { fundo: cores.sucessoSuave, texto: cores.sucesso },
-  RECUSADO: { fundo: cores.erroFundo, texto: cores.erroTexto },
-};
 
 type Campo = 'local' | 'referencia' | 'hora' | 'descricao' | 'confirmacaoFoto' | 'seguranca';
 
@@ -252,7 +248,6 @@ export default function TelaRelatar() {
         />
       )}
       {meus.map((relato) => {
-        const cor = COR_STATUS[relato.status];
         return (
           <Pressable
             key={relato.id}
@@ -265,9 +260,7 @@ export default function TelaRelatar() {
               <Text style={estilos.relatoTitulo}>
                 {ROTULO_TIPO_EVENTO[relato.tipo]} · {relato.bairro}
               </Text>
-              <View style={[estilos.chipStatus, { backgroundColor: cor.fundo }]}>
-                <Text style={[estilos.status, { color: cor.texto }]}>{INFO_STATUS_RELATO[relato.status].rotulo}</Text>
-              </View>
+              <SeloRelato status={relato.status} />
               <Text style={estilos.detalhe}>Enviado em {formatarDataHora(relato.enviadoEm)}</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={22} color={cores.textoSecundario} />

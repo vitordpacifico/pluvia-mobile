@@ -1,10 +1,12 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, type ComponentProps } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native';
 
 import { Aviso } from '@/componentes/Aviso';
 import { Botao } from '@/componentes/Botao';
 import { CampoTexto } from '@/componentes/CampoTexto';
+import { SeloRelato } from '@/componentes/SeloEstado';
 import { useAutenticacao } from '@/contexto/AutenticacaoContext';
 import { useDados } from '@/contexto/DadosContext';
 import { checarContexto } from '@/dominio/moderacao';
@@ -17,6 +19,8 @@ import { formatarConfianca } from '@/servicos/ia/triagem';
 import { formatarDataHora } from '@/utilitarios/formato';
 
 import { estilos } from './estilos';
+
+type NomeIcone = ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 export default function TelaRelato() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -61,6 +65,7 @@ export default function TelaRelato() {
 
   const status = INFO_STATUS_RELATO[relato.status];
   const triagem = relato.triagem;
+  const reforcam = pistas.filter((p) => p.reforca).length;
 
   async function revisar(publicar: boolean) {
     if (!relato) return;
@@ -100,30 +105,53 @@ export default function TelaRelato() {
       {mensagem && <Aviso tipo="info" texto={mensagem} />}
 
       <View style={estilosComuns.cartao}>
+        <SeloRelato status={relato.status} grande />
         <Text style={estilosComuns.titulo} accessibilityRole="header">
           {ROTULO_TIPO_EVENTO[relato.tipo]}
         </Text>
-        <Text style={estilos.detalhe}>
-          {relato.referencia} · {relato.bairro}
-        </Text>
-        <Text style={estilos.detalhe}>
-          Visto às {formatarDataHora(relato.ocorridoEm)} · enviado em {formatarDataHora(relato.enviadoEm)}
-        </Text>
+        <Linha icone="map-marker-outline" texto={`${relato.referencia} · ${relato.bairro}`} />
+        <Linha
+          icone="clock-outline"
+          texto={`Visto em ${formatarDataHora(relato.ocorridoEm)} · enviado em ${formatarDataHora(relato.enviadoEm)}`}
+        />
         {relato.descricao ? <Text style={estilosComuns.texto}>{relato.descricao}</Text> : null}
         {relato.fotoUri && (
           <Image source={{ uri: relato.fotoUri }} style={estilos.foto} accessibilityLabel="Foto enviada no relato" />
         )}
+        <Text style={estilos.explicacao}>{status.explicacao}</Text>
+        {relato.motivoRecusa && <Text style={estilos.detalhe}>Motivo: {relato.motivoRecusa}</Text>}
+        {relato.ocorrenciaId && (
+          <Botao
+            rotulo="Ver no mapa"
+            icone="map-marker"
+            variante="secundario"
+            onPress={() => router.push({ pathname: '/ocorrencia/[id]', params: { id: relato.ocorrenciaId ?? '' } })}
+          />
+        )}
       </View>
 
       <View style={estilosComuns.cartao}>
-        <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-          Triagem da IA
-        </Text>
+        <View style={estilos.cabecalho}>
+          <View style={estilos.iconeCabecalho}>
+            <MaterialCommunityIcons name="robot-outline" size={22} color={cores.primaria} />
+          </View>
+          <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
+            Triagem da IA
+          </Text>
+        </View>
         {triagem ? (
           <>
             <Text style={estilos.categoria}>{INFO_TRIAGEM[triagem.categoria].rotulo}</Text>
             <Text style={estilosComuns.texto}>{INFO_TRIAGEM[triagem.categoria].explicacao}</Text>
-            <Text style={estilos.detalhe}>Confiança da sugestão: {formatarConfianca(triagem.confianca)}</Text>
+            <View accessible accessibilityLabel={`Confiança da sugestão: ${formatarConfianca(triagem.confianca)}`}>
+              <View style={estilos.linhaConfianca}>
+                <Text style={estilos.detalhe}>Confiança da sugestão</Text>
+                <Text style={estilos.valorConfianca}>{formatarConfianca(triagem.confianca)}</Text>
+              </View>
+              <View style={estilos.trilhoConfianca}>
+                <View style={[estilos.barraConfianca, { width: `${Math.round(triagem.confianca * 100)}%` }]} />
+              </View>
+            </View>
             {triagem.simulada && (
               <Aviso
                 tipo="info"
@@ -137,32 +165,23 @@ export default function TelaRelato() {
         <Text style={estilos.nota}>{LIMITE_DA_IA}</Text>
       </View>
 
-      <View style={estilosComuns.cartao}>
-        <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
-          Situação: {status.rotulo}
-        </Text>
-        <Text style={estilosComuns.texto}>{status.explicacao}</Text>
-        {relato.motivoRecusa && <Text style={estilos.detalhe}>Motivo: {relato.motivoRecusa}</Text>}
-        {relato.ocorrenciaId && (
-          <Botao
-            rotulo="Ver no mapa"
-            icone="map-marker"
-            variante="secundario"
-            onPress={() => router.push({ pathname: '/ocorrencia/[id]', params: { id: relato.ocorrenciaId ?? '' } })}
-          />
-        )}
-      </View>
-
       {agente && relato.status === 'EM_ANALISE' && (
         <View style={estilosComuns.cartao}>
           <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
             Checagem do contexto
           </Text>
+          <Text style={estilos.detalhe}>
+            {reforcam} de {pistas.length} sinais reforçam o relato.
+          </Text>
           {pistas.map((pista) => (
-            <Text key={pista.texto} style={[estilos.pista, pista.reforca && estilos.pistaReforca]}>
-              {pista.reforca ? '✓ ' : '• '}
-              {pista.texto}
-            </Text>
+            <View key={pista.texto} style={estilos.pista}>
+              <MaterialCommunityIcons
+                name={pista.reforca ? 'check-circle' : 'minus-circle-outline'}
+                size={20}
+                color={pista.reforca ? cores.sucesso : cores.textoSecundario}
+              />
+              <Text style={[estilos.textoPista, pista.reforca && estilos.pistaReforca]}>{pista.texto}</Text>
+            </View>
           ))}
           <CampoTexto
             rotulo="Motivo, se recusar (opcional)"
@@ -191,5 +210,14 @@ export default function TelaRelato() {
         />
       )}
     </ScrollView>
+  );
+}
+
+function Linha({ icone, texto }: { icone: NomeIcone; texto: string }) {
+  return (
+    <View style={estilos.linha}>
+      <MaterialCommunityIcons name={icone} size={18} color={cores.textoSecundario} />
+      <Text style={estilos.detalhe}>{texto}</Text>
+    </View>
   );
 }

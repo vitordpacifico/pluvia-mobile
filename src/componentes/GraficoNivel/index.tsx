@@ -17,7 +17,7 @@ export function GraficoNivel({ leituras }: Props) {
     return <Text style={estilos.vazio}>Ainda não há leituras deste sensor.</Text>;
   }
 
-  const maximo = Math.max(LIMIAR_ALAGAMENTO_CM * 2.5, ...leituras.map((l) => l.nivelCm));
+  const maximo = Math.max(LIMIAR_ALAGAMENTO_CM * 1.6, ...leituras.map((l) => l.nivelCm * 1.1));
   const altura = (cm: number) => (cm / maximo) * ALTURA_GRAFICO;
   const primeira = leituras[0];
   const ultima = leituras[leituras.length - 1];

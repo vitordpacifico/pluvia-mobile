@@ -11,6 +11,7 @@ import { useDados } from '@/contexto/DadosContext';
 import { estadoExibido, INFO_ESTADO, type EstadoExibido } from '@/dominio/ocorrencia';
 import { EXPLICACAO_CONFIRMACAO_SENSOR, LIMIAR_ALAGAMENTO_CM } from '@/dominio/sensor';
 import { estilosComuns } from '@/estilos/comuns';
+import { cores } from '@/estilos/tema';
 import { fonteDeDados } from '@/servicos/dados/fonte';
 import { reiniciarSimulacao } from '@/servicos/dados/simulacao';
 import { pedirConfirmacao } from '@/utilitarios/confirmacao';
@@ -110,10 +111,21 @@ export default function TelaPainel() {
         const semSinal = sensorSemSinal(sensor.atualizadoEm);
         return (
           <View key={sensor.id} style={estilosComuns.cartao}>
-            <Text style={estilos.nome}>{sensor.nome}</Text>
-            <Text style={estilos.detalhe}>
-              {sensor.referencia} · {sensor.bairro}
-            </Text>
+            <View style={estilos.cabecalhoSensor}>
+              <View style={[estilos.iconeSensor, semSinal && estilos.iconeSensorSemSinal]}>
+                <MaterialCommunityIcons
+                  name={semSinal ? 'access-point-off' : 'access-point'}
+                  size={22}
+                  color={semSinal ? cores.textoSecundario : cores.primaria}
+                />
+              </View>
+              <View style={estilos.identidadeSensor}>
+                <Text style={estilos.nome}>{sensor.nome}</Text>
+                <Text style={estilos.detalhe}>
+                  {sensor.referencia} · {sensor.bairro}
+                </Text>
+              </View>
+            </View>
             {semSinal ? (
               <Aviso
                 tipo="aviso"
@@ -121,7 +133,22 @@ export default function TelaPainel() {
               />
             ) : (
               <>
-                <Text style={estilos.nivel}>Água: {formatarCm(sensor.nivelCm)}</Text>
+                <View style={estilos.linhaNivel}>
+                  <Text style={estilos.nivel}>Água: {formatarCm(sensor.nivelCm)}</Text>
+                  {sensor.nivelCm >= LIMIAR_ALAGAMENTO_CM ? (
+                    <View style={[estilos.seloSensor, { backgroundColor: cores.perigo }]}>
+                      <MaterialCommunityIcons name="water-alert" size={16} color={cores.textoSobrePrimaria} />
+                      <Text style={[estilos.textoSeloSensor, { color: cores.textoSobrePrimaria }]}>
+                        Acima de {LIMIAR_ALAGAMENTO_CM} cm
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={[estilos.seloSensor, { backgroundColor: cores.sucessoSuave }]}>
+                      <MaterialCommunityIcons name="check-circle-outline" size={16} color={cores.sucesso} />
+                      <Text style={[estilos.textoSeloSensor, { color: cores.sucesso }]}>Nível normal</Text>
+                    </View>
+                  )}
+                </View>
                 <GraficoNivel leituras={sensor.leituras} />
                 {simulada && (
                   <Botao

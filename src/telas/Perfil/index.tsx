@@ -232,10 +232,18 @@ export default function TelaPerfil() {
             <View style={estilos.chipPerfil}>
               <Text style={estilos.textoPerfil}>{ROTULO_PERFIL[usuario.perfil]}</Text>
             </View>
-            {usuario.orgao && <Dado rotulo="Órgão" valor={usuario.orgao} />}
-            {!cidadao && <Dado rotulo="E-mail" valor={usuario.email} />}
           </View>
         </View>
+
+        {!cidadao && (
+          <View style={estilosComuns.cartao}>
+            <Text style={estilosComuns.tituloSecao} accessibilityRole="header">
+              Dados da equipe
+            </Text>
+            {usuario.orgao && <Dado rotulo="Órgão" valor={usuario.orgao} />}
+            <Dado rotulo="E-mail" valor={usuario.email} />
+          </View>
+        )}
 
         {cidadao && <EditarCidadao usuario={usuario} />}
 

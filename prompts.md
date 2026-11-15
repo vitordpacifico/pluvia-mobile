@@ -113,6 +113,12 @@ Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de 
 
 **Resultado:** Tela de relatar dividida em etapas numeradas e área de foto destacada. Detalhe da ocorrência com faixa de cor do estado, ícones nas informações e histórico em linha do tempo. Avisos com ícone e cor por tipo e marca de não lido. Perfil com avatar de iniciais. Telas vazias com ícone e texto curto. Aba ativa com fundo destacado. Campo de texto sem o contorno preto do navegador. Prints do README refeitos.
 
+### 16. Revisão final do visual (15/11/2026)
+
+**Pedido:** Revisar o projeto inteiro e refinar o visual ao máximo.
+
+**Resultado:** Tela do relato com selo colorido da situação, ícones, barra de confiança da IA e checagem do contexto com ícones. Painel com selo de nível em cada sensor, ícone de sensor sem sinal e gráfico mais compacto. Carro de demonstração com endereço de rua e botões do mesmo tamanho. Dados da equipe num cartão próprio no perfil. Selo de situação do relato reaproveitado na lista de relatos.
+
 ## Decisões sugeridas pela IA, para o grupo revisar
 
 - Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.

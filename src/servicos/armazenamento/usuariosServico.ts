@@ -55,7 +55,7 @@ export const CONTAS_DEMONSTRACAO = [
 export const CARRO_DEMONSTRACAO = {
   nome: 'Meu carro',
   bairro: 'Cambuci',
-  referencia: 'Perto do sensor de demonstração 1',
+  referencia: 'Rua Lavapés, 400',
   local: { latitude: -23.5679, longitude: -46.6178 },
   raioM: 500,
 } as const;

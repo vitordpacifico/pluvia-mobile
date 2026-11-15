@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { cores } from '@/estilos/tema';
 
-export const ALTURA_GRAFICO = 160;
+export const ALTURA_GRAFICO = 130;
 
 export const estilos = StyleSheet.create({
   area: {

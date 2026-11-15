@@ -163,8 +163,12 @@ export default function TelaMeuCarro() {
           )}
           {situacao.risco && <SeloFaixa faixa={situacao.risco.faixa} />}
           <View style={estilos.botoes}>
-            <Botao rotulo="Atualizar local" icone="map-marker-radius" variante="secundario" onPress={abrirEdicao} />
-            <Botao rotulo="Apagar" icone="delete" variante="perigo" onPress={remover} />
+            <View style={estilos.botao}>
+              <Botao rotulo="Mudar local" icone="map-marker-radius" variante="secundario" onPress={abrirEdicao} />
+            </View>
+            <View style={estilos.botao}>
+              <Botao rotulo="Apagar" icone="delete" variante="perigo" onPress={remover} />
+            </View>
           </View>
         </View>
       )}

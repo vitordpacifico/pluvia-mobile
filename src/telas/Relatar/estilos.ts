@@ -21,6 +21,4 @@ export const estilos = StyleSheet.create({
   relato: { flexDirection: 'row', alignItems: 'center' },
   relatoCorpo: { flex: 1, gap: 6 },
   relatoTitulo: { fontSize: 16, fontWeight: '700', color: cores.texto },
-  chipStatus: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  status: { fontSize: 13, fontWeight: '700' },
 });

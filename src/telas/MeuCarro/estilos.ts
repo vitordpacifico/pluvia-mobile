@@ -18,6 +18,7 @@ export const estilos = StyleSheet.create({
   local: { fontSize: 17, fontWeight: '800', color: cores.texto },
   detalhe: { fontSize: 14, color: cores.textoSecundario, lineHeight: 20 },
   botoes: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  botao: { flexGrow: 1, flexBasis: 130 },
   consulta: { gap: 8 },
   nota: { fontSize: 13, color: cores.textoSecundario },
 });
