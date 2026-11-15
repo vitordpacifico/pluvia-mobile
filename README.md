@@ -47,11 +47,11 @@ Ainda precisam ser validadas em testes com pessoas do público-alvo.
 
 | Nome | RM |
 |---|---|
-| Victor Pacifico Dias | 558017 |
+| Eduardo Dallabella Lima | 556803 |
 | Guilherme Abe | 554743 |
 | Gustavo Ruiz Vieira Paulino | 554779 |
-| Eduardo | A preencher |
-| Heloísa | A preencher |
+| Heloísa Real | 554535 |
+| Victor Pacifico Dias | 558017 |
 
 **Vídeo (até 3 min):** link a preencher. O roteiro está em [docs/ROTEIRO_VIDEO.md](docs/ROTEIRO_VIDEO.md).
 
