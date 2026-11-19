@@ -148,7 +148,7 @@ Também é possível criar uma conta de cidadão em **Criar conta**. A equipe n�
 | **Persistência (AsyncStorage)** | Camada de serviço em `src/servicos/armazenamento/`: contas, sessão, avisos, preferências, cópia offline do mapa e estado da simulação. Só `armazenamento.ts` acessa o AsyncStorage diretamente. Os dados pessoais (telefone, CEP, local do carro e favoritos) ficam no cofre do sistema (veja Segurança). |
 | **Acessibilidade** | Veja a seção abaixo |
 | **Aderência ao problema** | Segue o MVP do documento de definição: mapa com status, meu carro com aviso, relato com foto e triagem de IA, e aviso de encerramento. Diferencia os cinco estados do documento e nunca trata "sem dados" como "seguro". |
-| **Documentação** | Este README, o contrato da API ([docs/API.md](docs/API.md)), o roteiro do vídeo e o `prompts.md` |
+| **Documentação** | Este README, o contrato da API ([docs/API.md](docs/API.md)) e o roteiro do vídeo |
 
 ## Arquitetura
 
@@ -297,7 +297,3 @@ São 156 testes automatizados, divididos em duas camadas:
 - As fontes candidatas para a versão real, segundo o documento de definição, são o CGE-SP, o GeoSampa e o INMET. Antes do uso, é preciso confirmar licença, API disponível e frequência de atualização.
 - Nenhum dado pessoal real é usado.
 - O Pluvia não substitui os comunicados oficiais. Em emergência, ligue 199 (Defesa Civil) ou 193 (Bombeiros).
-
-## Uso de IA
-
-O registro dos prompts está em [prompts.md](prompts.md).
