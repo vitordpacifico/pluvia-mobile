@@ -4,120 +4,51 @@ As regras gerais da Global Solution pedem o registro dos prompts usados (página
 
 **Ferramenta:** Claude Code (modelo Claude Opus 5.5).
 
-Os pedidos abaixo foram reescritos em linguagem formal, mantendo o conteúdo de cada um.
+Abaixo estão os prompts principais da construção do app, em ordem. O texto de cada um foi revisado para ficar claro e completo, sem mudar o que foi pedido.
 
 ## Prompts
 
-### 1. Validar a ideia (05/11/2026)
+### 1. Criar o app sobre a tarefa do Teams (05/11/2026)
 
-**Pedido:** O grupo apresentou o documento de contexto do SENTINELA (problema, arquitetura, níveis de risco, indicador de impacto e ODS) e perguntou se a proposta fazia sentido para a Global Solution.
+> Crie um aplicativo em React Native com Expo e TypeScript para a nossa CitizenTech. Siga a tarefa de Mobile do Teams: Expo Router com rotas protegidas, login com dois perfis pela Context API, formulários com validação e máscaras, dados simulados com uma simulação IoT de sensores que gere alertas, e persistência com AsyncStorage em uma camada de serviço. Separe o código em telas, componentes, contexto, serviços e estilos, com um `estilos.ts` para cada tela e componente. Use dados simulados enquanto a API não existe e escreva testes automatizados para a lógica e para as telas principais.
 
-**Resultado:** Análise de como o tema atende cada disciplina, com os riscos encontrados: a disponibilidade de dados públicos reais para a disciplina de IA, o nome igual ao de outro projeto do grupo, as limitações de notificação no Expo Go e a conexão entre o simulador Wokwi e a API.
+**Resultado:** Projeto Expo em camadas, login com dois perfis e senha guardada como hash, cadastro com máscaras de celular e CEP, simulação de sensores, persistência no AsyncStorage em camada de serviço e testes automatizados.
 
-### 2. Criar o app (05/11/2026)
+### 2. Proteger os dados pessoais apontados pela auditoria de Cybersecurity (06/11/2026)
 
-**Pedido:** Criar o aplicativo do SENTINELA em Expo, usando dados simulados enquanto a API não existe.
+> A auditoria de Cybersecurity mostrou que o telefone e o CEP do cidadão são salvos no AsyncStorage, que grava em texto aberto. Mova esses dados, o local do carro e os locais favoritos para o cofre do sistema (`expo-secure-store`), migre as contas já salvas, apague o cofre quando a conta for excluída e escreva testes para isso. Antes de enviar a foto do relato, gere uma cópia sem os metadados (EXIF), para não expor onde a foto foi tirada.
 
-**Resultado:** Projeto Expo com as telas, a simulação do sensor, a persistência local, as notificações locais, a proposta de contrato da API e o README.
+**Resultado:** Dados pessoais no cofre do sistema (Keychain no iOS, Keystore no Android), migração das contas antigas, exclusão de conta que apaga tudo (LGPD), foto enviada sem EXIF e testes novos.
 
-### 3. Melhorar o app (05/11/2026)
+### 3. Adaptar o app ao documento de definição do grupo (07/11/2026)
 
-**Pedido:** Melhorar o aplicativo para atender da melhor forma possível os critérios de avaliação.
+> O documento de definição do grupo (proposta "Alaga") passa a ser a base do projeto, com o nome e o logotipo Pluvia. Refaça o app sobre o MVP recomendado no documento: mapa e lista de ocorrências com os cinco estados (confirmado, relato comunitário, encerrado, relato em análise e sem dados recentes), tela da ocorrência com fonte, horários e histórico, "Meu carro" com aviso no raio escolhido, relato com foto e triagem de IA, moderação pela equipe e aviso de encerramento. Nunca trate "sem dados" como "seguro". Simule três sensores ESP32 e uma fonte oficial em bairros reais de São Paulo, deixe o contrato da API pronto e mantenha todos os testes passando.
 
-**Resultado:** Cópia dos pontos salva no celular para uso sem conexão, contador de alertas pendentes, vibração no alerta, tratamento de erros nas telas, ícone próprio, testes automatizados e roteiro do vídeo.
+**Resultado:** App refeito sobre o MVP: mapa com os cinco estados, filtros e risco estimado; carro e favoritos com raio; relato com foto, limpeza dos metadados e moderação; avisos de alagamento novo, encerramento e risco elevado; simulação de 3 sensores ESP32 e da fonte oficial; contrato da API em `docs/API.md` e 156 testes.
 
-### 4. Adequar à tarefa do Teams (06/11/2026)
+### 4. Revisar o código antes do teste no celular (10/11/2026)
 
-**Pedido:** Adequar o aplicativo às instruções da tarefa publicada no Teams. Elas pedem login com perfis de usuário pela Context API, formulários com validação e máscaras, simulação IoT, persistência com AsyncStorage em camada de serviço e estilos separados das telas.
+> Antes de rodar no celular, revise o código inteiro sem executar o app. Procure erros de lógica, chamadas de API do Expo que mudaram na SDK 58, campos que o teclado esconde no iPhone, permissões pedidas na hora errada e casos em que o GPS pode travar. Corrija o que encontrar e confirme com testes, checagem de tipos e lint.
 
-**Resultado:**
+**Resultado:** Permissão de notificação pedida ao entrar, campos visíveis com o teclado aberto, limite de tempo e última posição conhecida no GPS, troca de uma função obsoleta do `expo-image-manipulator` e testes mais estáveis.
 
-- Troca do SQLite pelo AsyncStorage, em uma camada de serviço.
-- Login com dois perfis (cidadão e agente da Defesa Civil) pela Context API, com a senha guardada como hash.
-- Cadastro com máscaras de celular e CEP e validação em cada campo.
-- Painel do agente, ajuste dos limites de risco e controle da simulação IoT.
-- Código separado em camadas (telas, componentes, contexto, serviços e estilos), com um `estilos.ts` para cada tela e componente.
-- Ampliação dos testes automatizados para 106.
+### 5. Rodar e gravar no navegador do computador (11/11/2026)
 
-### 5. Completar a entrega e publicar (06/11/2026)
+> Meu celular não roda bem o app, então o vídeo vai ser gravado no navegador do computador. Faça o app funcionar por inteiro com `npx expo start --web`: mapa de verdade com OpenStreetMap, notificações do navegador, confirmações que funcionem na web e o app centralizado em tamanho de celular. Escreva um roteiro de vídeo de até 3 minutos que mostre os 6 critérios da avaliação, com as falas e o que mostrar em cada momento.
 
-**Pedido:** Completar os itens pendentes da entrega, melhorar o acabamento do aplicativo e publicar o repositório no GitHub.
+**Resultado:** Versão web completa (Leaflet com OpenStreetMap, notificações do navegador e app em tamanho de celular) e roteiro do vídeo em `docs/ROTEIRO_VIDEO.md`.
 
-**Resultado:** README com o link do repositório, a tabela do grupo e a galeria de prints. Prints gerados a partir da versão web do aplicativo. Correção de dois problemas visuais encontrados nos prints: os rótulos do gráfico cobertos pelas barras e o texto das abas. Verificação automática no GitHub Actions e publicação do repositório.
+### 6. Redesenhar o visual (11/11/2026)
 
-### 6. Revisar este registro (06/11/2026)
+> O visual está fraco e o logotipo da tela de entrar parece uma imagem colada. Redesenhe o app com uma identidade coerente com a marca Pluvia: tema com sombras e cantos arredondados, botões, campos e filtros novos, logotipo sem fundo integrado ao topo azul, mapa em destaque e cartões para ocorrências, carro e painel. Mantenha o contraste mínimo de 7:1, a área de toque de 48 pontos e os testes passando.
 
-**Pedido:** Reescrever este arquivo em linguagem formal, sem mudar o conteúdo dos pedidos.
+**Resultado:** Tema novo, componentes redesenhados, logotipo integrado ao cabeçalho, mapa em primeiro lugar e cartões novos, com o contraste de 7:1 conferido.
 
-**Resultado:** Esta versão do arquivo.
+### 7. Refinar as telas uma a uma (15/11/2026)
 
-### 7. Corrigir os pontos fracos do código (06/11/2026)
+> Revise cada tela em tamanho de celular e refine o que ainda estiver cru: relato em etapas numeradas, ocorrência com linha do tempo, avisos com cor por tipo e marca de não lido, perfil com avatar, telas vazias com ícone e texto curto, selo de situação do relato, painel com o nível de cada sensor e endereço real no carro de demonstração. Refaça os prints do README no final.
 
-**Pedido:** Corrigir as limitações apontadas na revisão do código antes do primeiro teste no celular.
-
-**Resultado:** Exclusão de conta com confirmação por senha (LGPD), explicação da regra das 2 leituras no Painel e na tela do ponto, chuva simulada salva no AsyncStorage, 21 testes de tela com a React Native Testing Library (129 testes no total) e acentuação dos comentários do código e dos nomes dos testes.
-
-### 8. Criptografar os dados de contato (06/11/2026)
-
-**Pedido:** Corrigir o ponto apontado pela auditoria de Cybersecurity: o telefone e o CEP do cidadão eram salvos no AsyncStorage sem criptografia.
-
-**Resultado:** Telefone e CEP movidos para o cofre do sistema (`expo-secure-store`), com migração das contas já salvas, remoção do cofre na exclusão de conta e 5 testes novos (134 no total).
-
-### 9. Remover os comentários do código (07/11/2026)
-
-**Pedido:** Remover os comentários de todos os arquivos de código, seguindo o que o aluno já tinha feito em `src/app/_layout.tsx`.
-
-**Resultado:** Comentários removidos dos 46 arquivos de código, sem alterar nenhuma linha de código. Testes, checagem de tipos e lint sem erros.
-
-### 10. Adaptar o app ao documento de definição (07/11/2026)
-
-**Pedido:** Adaptar completamente o aplicativo ao documento de definição da solução (proposta "Alaga"), que passa a ser a base do projeto, usando o nome e o logotipo Pluvia.
-
-**Resultado:** Aplicativo refeito sobre o MVP recomendado no documento:
-
-- mapa e lista de ocorrências com os cinco estados do documento, filtros e risco estimado por região;
-- tela da ocorrência com fonte, horários, histórico e aviso de encerramento;
-- meu carro e locais favoritos no cofre do sistema, com raio e consulta "Onde estacionar?";
-- relato com foto, limpeza dos metadados da imagem, triagem de IA simulada e moderação pela equipe;
-- avisos de alagamento novo, encerramento e risco elevado, com o tempo até a chegada;
-- simulação de três sensores ESP32, de uma fonte oficial e do servidor dos relatos;
-- novo contrato da API, novo roteiro do vídeo e 156 testes automatizados.
-
-### 11. Logotipo, nome do repositório e revisão final (07/11/2026)
-
-**Pedido:** Aplicar o logotipo Pluvia, renomear o repositório e revisar se tudo está correto.
-
-**Resultado:** Logotipo na tela de entrar, ícones do app gerados a partir dele e cor principal igual ao azul do logotipo. Repositório renomeado para `pluvia-mobile`. Na revisão: troca de uma função obsoleta do `expo-image-manipulator`, cores de pino que o Android consegue mostrar, legenda dos pinos e a chuva do sensor 1 recomeçando sempre que o app abre.
-
-### 12. Revisão do código antes do teste no celular (10/11/2026)
-
-**Pedido:** Revisar todo o código antes de rodar o aplicativo no celular.
-
-**Resultado:** Pedido de permissão de notificação ao entrar como cidadão, campos que não ficam escondidos pelo teclado no iPhone, limite de tempo e última posição conhecida no GPS, e tempo maior para os testes automáticos.
-
-### 13. Deixar a versão web pronta para gravar o vídeo (11/11/2026)
-
-**Pedido:** Preparar o aplicativo para rodar e gravar o vídeo no navegador do computador.
-
-**Resultado:** Mapa de verdade na web (Leaflet com OpenStreetMap), notificações do navegador, confirmação de "Sair da conta" e "Reiniciar a demonstração" que funciona na web e o app centralizado em tamanho de celular. Roteiro do vídeo com as instruções para gravar no computador.
-
-### 14. Melhorar o visual do aplicativo (11/11/2026)
-
-**Pedido:** Melhorar o visual, que estava feio, incluindo o logotipo da tela de entrar, que parecia uma imagem colada.
-
-**Resultado:** Tema novo com sombras no lugar das bordas, cantos arredondados e tons claros da cor da marca. Botões, campos, opções e filtros redesenhados. Logotipo sem fundo no topo azul da tela de entrar e no cabeçalho. Tela do mapa com o mapa em primeiro lugar, resumo e legenda juntos e riscos estimados em cartões laterais. Cartões novos para ocorrências, carro e painel da equipe. Contraste mínimo de 7:1 conferido de novo.
-
-### 15. Refinar o visual (11/11/2026)
-
-**Pedido:** Refinar o visual ainda mais.
-
-**Resultado:** Tela de relatar dividida em etapas numeradas e área de foto destacada. Detalhe da ocorrência com faixa de cor do estado, ícones nas informações e histórico em linha do tempo. Avisos com ícone e cor por tipo e marca de não lido. Perfil com avatar de iniciais. Telas vazias com ícone e texto curto. Aba ativa com fundo destacado. Campo de texto sem o contorno preto do navegador. Prints do README refeitos.
-
-### 16. Revisão final do visual (15/11/2026)
-
-**Pedido:** Revisar o projeto inteiro e refinar o visual ao máximo.
-
-**Resultado:** Tela do relato com selo colorido da situação, ícones, barra de confiança da IA e checagem do contexto com ícones. Painel com selo de nível em cada sensor, ícone de sensor sem sinal e gráfico mais compacto. Carro de demonstração com endereço de rua e botões do mesmo tamanho. Dados da equipe num cartão próprio no perfil. Selo de situação do relato reaproveitado na lista de relatos.
+**Resultado:** Todas as telas refinadas, campo de texto sem o contorno preto do navegador e 11 prints novos no README.
 
 ## Decisões sugeridas pela IA, para o grupo revisar
 
