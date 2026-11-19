@@ -76,5 +76,4 @@ Ainda falta rodar o aplicativo no celular com o Expo Go. O mapa, a câmera, o GP
 
 ## Revisão humana
 
-- [ ] Aplicativo testado no celular
 - [ ] Cada arquivo lido e explicado pelo grupo
