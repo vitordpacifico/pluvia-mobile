@@ -53,7 +53,7 @@ Ainda precisam ser validadas em testes com pessoas do público-alvo.
 | Heloísa Real | 554535 |
 | Victor Pacifico Dias | 558017 |
 
-**Vídeo (até 3 min):** link a preencher. O roteiro está em [docs/ROTEIRO_VIDEO.md](docs/ROTEIRO_VIDEO.md).
+**Vídeo (até 3 min):** https://youtu.be/sPLUqtZ08mI. O roteiro está em [docs/ROTEIRO_VIDEO.md](docs/ROTEIRO_VIDEO.md).
 
 ## Como instalar e rodar
 
