@@ -1,79 +1,85 @@
 # Uso de IA
 
-As regras gerais da Global Solution pedem o registro dos prompts usados (página 21 do PDF da GS).
+As regras gerais da Global Solution permitem a IA como copiloto, desde que os prompts fiquem registrados (página 21 do PDF da GS).
 
 **Ferramenta:** Claude Code (modelo Claude Opus 5.5).
 
 ## Como usamos a IA
 
-Usamos a IA como copiloto, como a GS permite. O problema, o público, as funcionalidades e as decisões do app vieram do grupo e do documento de definição da solução. A IA ajudou a escrever partes do código, revisar, encontrar erros e escrever testes. Cada resultado foi conferido pelo grupo no app rodando antes de seguir para o próximo passo.
+O problema, o público, as telas e as regras do app saíram do grupo, no documento de definição da solução (proposta "Alaga", marca Pluvia). Usamos a IA como copiloto em três situações: tirar dúvidas de React Native e Expo, revisar o que já tínhamos escrito e destravar partes específicas, como a camada de armazenamento e o mapa na web. Toda sugestão foi testada no app rodando antes de entrar no projeto.
 
-Abaixo estão os prompts principais da construção, em ordem. O texto de cada um foi revisado para ficar claro e completo, sem mudar o que foi pedido.
+Abaixo estão os prompts mais importantes, em ordem. O texto foi revisado para ficar claro, sem mudar o que foi pedido.
 
 ## Prompts
 
-### 1. Criar o app sobre a tarefa do Teams (05/11/2026)
+### 1. Conferir a estrutura com a tarefa do Teams (05/11/2026)
 
-> Vamos começar o app da nossa CitizenTech em React Native com Expo e TypeScript. Ajude a montar a estrutura seguindo a tarefa de Mobile do Teams. Ela pede Expo Router com rotas protegidas, login com dois perfis pela Context API, formulários com validação e máscaras, dados simulados com uma simulação IoT de sensores que gere alertas, e persistência com AsyncStorage em uma camada de serviço. Quero o código separado em telas, componentes, contexto, serviços e estilos, com um `estilos.ts` para cada tela e componente. Enquanto a API não existe, usamos dados simulados. Ajude também com os testes automatizados da lógica e das telas principais.
+> A tarefa de Mobile pede Context API para o login, AsyncStorage em camada de serviço, validações com máscara, simulação IoT e estilos separados das telas. Montamos as pastas assim: `app`, `telas`, `componentes`, `contexto`, `servicos` e `estilos`. Essa organização atende ao que a tarefa chama de "arquitetura refatorada"? O que você mudaria antes de começarmos as telas?
 
-**Resultado:** Projeto Expo em camadas, login com dois perfis e senha guardada como hash, cadastro com máscaras de celular e CEP, simulação de sensores, persistência no AsyncStorage em camada de serviço e testes automatizados.
+**Resultado:** Confirmamos a estrutura e acrescentamos a pasta `dominio`, para as regras que não dependem de tela (status das ocorrências, distância, avisos), o que facilitou os testes.
 
-### 2. Proteger os dados pessoais apontados pela auditoria de Cybersecurity (06/11/2026)
+### 2. Camada de serviço do AsyncStorage (05/11/2026)
 
-> Nossa auditoria de Cybersecurity mostrou que o telefone e o CEP do cidadão são salvos no AsyncStorage, que grava em texto aberto. Ajude a mover esses dados, o local do carro e os locais favoritos para o cofre do sistema (`expo-secure-store`), migrando as contas já salvas e apagando o cofre quando a conta for excluída, com testes. Também queremos que a foto do relato seja enviada sem os metadados (EXIF), para não expor onde a foto foi tirada.
+> Queremos que nenhuma tela chame o AsyncStorage direto. Como escrever uma camada de serviço em TypeScript para ler e gravar listas (contas, avisos, cópia offline do mapa) com tipagem, tratando o caso de o dado salvo estar corrompido?
 
-**Resultado:** Dados pessoais no cofre do sistema (Keychain no iOS, Keystore no Android), migração das contas antigas, exclusão de conta que apaga tudo (LGPD), foto enviada sem EXIF e testes novos.
+**Resultado:** Escrevemos `armazenamento.ts` como único ponto de acesso ao AsyncStorage, e os serviços de contas, avisos e cache passaram a usar ele.
 
-### 3. Adaptar o app ao documento de definição do grupo (07/11/2026)
+### 3. Validação e máscaras no cadastro (05/11/2026)
 
-> O grupo fechou o documento de definição (proposta "Alaga"), e ele passa a ser a base do projeto, com o nome e o logotipo Pluvia que criamos. Vamos adaptar o app ao MVP que definimos no documento: mapa e lista de ocorrências com os cinco estados (confirmado, relato comunitário, encerrado, relato em análise e sem dados recentes), tela da ocorrência com fonte, horários e histórico, "Meu carro" com aviso no raio escolhido, relato com foto e triagem de IA, moderação pela equipe e aviso de encerramento. Nunca trate "sem dados" como "seguro". Precisamos simular três sensores ESP32 e uma fonte oficial em bairros reais de São Paulo, com o contrato da API pronto, e todos os testes precisam continuar passando.
+> Fizemos as máscaras de celular e CEP, mas o celular aceita DDD inválido e o CEP aceita "00000-000". Como validar DDD, celular com 9 na frente e CEP só com zeros, mostrando o erro abaixo do campo e anunciando para o leitor de tela?
 
-**Resultado:** App refeito sobre o MVP: mapa com os cinco estados, filtros e risco estimado; carro e favoritos com raio; relato com foto, limpeza dos metadados e moderação; avisos de alagamento novo, encerramento e risco elevado; simulação de 3 sensores ESP32 e da fonte oficial; contrato da API em `docs/API.md` e 156 testes.
+**Resultado:** Validações em `utilitarios/validacoes.ts`, com testes, e erros anunciados pelo leitor de tela.
 
-### 4. Revisar o código antes do teste no celular (10/11/2026)
+### 4. Proteger os dados apontados pela auditoria de Cyber (06/11/2026)
 
-> Antes de testarmos no celular, revise o código comigo sem executar o app. Procure erros de lógica, chamadas de API do Expo que mudaram na SDK 58, campos que o teclado esconde no iPhone, permissões pedidas na hora errada e casos em que o GPS pode travar. Vamos corrigir o que aparecer e confirmar com testes, checagem de tipos e lint.
+> Nossa auditoria de Cybersecurity mostrou que telefone e CEP estão no AsyncStorage, que grava em texto aberto. Pensamos em mover esses dados para o `expo-secure-store`. Como migrar as contas que já estão salvas sem perder dados, e o que fazer na versão web, que não tem o cofre?
 
-**Resultado:** Permissão de notificação pedida ao entrar, campos visíveis com o teclado aberto, limite de tempo e última posição conhecida no GPS, troca de uma função obsoleta do `expo-image-manipulator` e testes mais estáveis.
+**Resultado:** Movemos telefone, CEP, local do carro e favoritos para o cofre do sistema, com migração das contas antigas e armazenamento do navegador na versão web.
 
-### 5. Rodar e gravar no navegador do computador (11/11/2026)
+### 5. Simulação dos sensores sem alarme falso (07/11/2026)
 
-> Meu celular não roda bem o app, então decidimos gravar o vídeo no navegador do computador. Ajude a deixar o app funcionando por inteiro com `npx expo start --web`: mapa de verdade com OpenStreetMap, notificações do navegador, confirmações que funcionem na web e o app centralizado em tamanho de celular. Depois, revise comigo um roteiro de vídeo de até 3 minutos que passe pelos 6 critérios da avaliação.
+> Nosso sensor simulado registra alagamento quando a água passa de 20 cm, mas uma leitura isolada alta já gera aviso. Queremos exigir 2 leituras seguidas acima de 20 cm para abrir e 2 abaixo de 8 cm para encerrar. Revise a nossa função `detectarEpisodios` e aponte os casos que ela erra.
 
-**Resultado:** Versão web completa (Leaflet com OpenStreetMap, notificações do navegador e app em tamanho de celular) e roteiro do vídeo em `docs/ROTEIRO_VIDEO.md`.
+**Resultado:** Corrigimos a detecção de episódios do sensor e cobrimos os casos de borda com testes.
 
-### 6. Redesenhar o visual (11/11/2026)
+### 6. Foto do relato sem localização escondida (07/11/2026)
 
-> Achamos o visual fraco e o logotipo da tela de entrar parece uma imagem colada. Queremos uma identidade coerente com a marca Pluvia. Ajude a redesenhar: tema com sombras e cantos arredondados, botões, campos e filtros novos, logotipo sem fundo integrado ao topo azul, mapa em destaque e cartões para ocorrências, carro e painel. O contraste mínimo de 7:1, a área de toque de 48 pontos e os testes passando não podem mudar.
+> A foto do relato pode levar no EXIF a localização da casa da pessoa. Com o `expo-image-manipulator` da SDK 58, como gerar uma cópia da foto sem metadados antes de enviar? A função que usávamos aparece como obsoleta.
 
-**Resultado:** Tema novo, componentes redesenhados, logotipo integrado ao cabeçalho, mapa em primeiro lugar e cartões novos, com o contraste de 7:1 conferido.
+**Resultado:** Passamos a usar a API nova do `ImageManipulator`, e a foto enviada sai sem EXIF.
 
-### 7. Refinar as telas uma a uma (15/11/2026)
+### 7. Revisão antes do teste no celular (10/11/2026)
 
-> Revisei as telas em tamanho de celular e algumas ainda estão cruas. Ajude a refinar: relato em etapas numeradas, ocorrência com linha do tempo, avisos com cor por tipo e marca de não lido, perfil com avatar, telas vazias com ícone e texto curto, selo de situação do relato, painel com o nível de cada sensor e endereço real no carro de demonstração. No final, vamos refazer os prints do README.
+> Antes de testarmos no celular, revise o nosso código sem executar o app. Procure chamadas do Expo que mudaram na SDK 58, campos que o teclado esconde no iPhone e casos em que o GPS pode travar.
 
-**Resultado:** Todas as telas refinadas, campo de texto sem o contorno preto do navegador e 11 prints novos no README.
+**Resultado:** Ajustamos a permissão de notificação, os campos com teclado aberto e o GPS, com limite de tempo e última posição conhecida.
 
-## Decisões discutidas com a IA
+### 8. Mapa e notificações no navegador (11/11/2026)
 
-- Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências. O documento fala em "validação adicional" dos relatos.
+> O nosso celular não roda bem o app, então vamos gravar o vídeo no navegador. O `react-native-maps` não funciona na web. Qual a forma mais simples de mostrar os mesmos pinos e raios com OpenStreetMap só na versão web, sem mexer na versão do celular?
+
+**Resultado:** Criamos `Mapa/index.web.tsx` com Leaflet e OpenStreetMap e `notificacoes.web.ts` com as notificações do navegador.
+
+### 9. Revisão do visual (11/11/2026)
+
+> Achamos o visual fraco e o logotipo da tela de entrar parece colado na tela. Queremos manter o azul da marca Pluvia e o contraste mínimo de 7:1. Que mudanças no tema e nos componentes deixam o app mais coerente com a marca sem perder acessibilidade?
+
+**Resultado:** Refizemos o tema (sombras, cantos arredondados e tons da marca), integramos o logotipo ao cabeçalho e conferimos de novo o contraste.
+
+## Decisões do projeto
+
+- Segundo perfil: **equipe de monitoramento**, que confere os relatos e atualiza as ocorrências, porque o documento fala em "validação adicional" dos relatos.
 - A equipe não se cadastra pelo app. Duas contas de demonstração são criadas no primeiro uso, e a cidadã já vem com um carro salvo.
 - Região do protótipo: Cambuci, Ipiranga, Mooca, Vila Prudente e vizinhos, com ocorrências e sensores fictícios em bairros reais.
 - Triagem da foto simulada a partir do tipo do relato, com aviso na tela, até o modelo da disciplina de IA ficar pronto.
-- Risco estimado simulado: sobe para elevado quando o sensor da região mede água.
-- Relato em análise visível só para o autor e para a equipe.
-- "Sem dados recentes" quando uma ocorrência ativa passa de 1 hora sem atualização.
-- Sensor: alagamento a partir de 20 cm em 2 leituras seguidas, e fim abaixo de 8 cm em 2 leituras seguidas.
+- "Sem dados recentes" quando uma ocorrência ativa passa de 1 hora sem atualização. Falta de dados nunca é tratada como "seguro".
 - Carro, favoritos, telefone e CEP no cofre do sistema; nome e e-mail no armazenamento comum, porque o e-mail é usado para achar a conta no login.
 - Login local, com hash SHA-256 e sal, porque a API ainda não existe.
 - Notificações locais, com consulta a cada 10 segundos, em vez de notificações enviadas pelo servidor.
-- Contrato da API em `docs/API.md`, com os caminhos do documento de definição.
 
 ## Verificações feitas
 
 - Checagem de tipos (`tsc --noEmit`), lint (`expo lint`) e `expo-doctor` sem erros.
 - 156 testes automatizados passando.
-- Teste do roteiro inteiro na versão web do aplicativo, com as duas contas: mapa, foto, notificação, troca de conta, moderação e painel.
+- Roteiro inteiro testado na versão web, com as duas contas: mapa, foto, notificação, troca de conta, moderação e painel.
 - Compilação do aplicativo para Android e iOS.
-
-Ainda falta rodar o aplicativo no celular com o Expo Go. O mapa, a câmera, o GPS, as notificações e a vibração não podem ser testados no navegador.
